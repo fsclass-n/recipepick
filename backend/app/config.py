@@ -44,7 +44,9 @@ class Settings:
         self.seed_test_accounts = _bool("SEED_TEST_ACCOUNTS", True)
 
         self.gemini_api_key = os.getenv("GEMINI_API_KEY", "").strip()
-        self.gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        self.gemini_model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+        self.gemini_fallback_models = _list("GEMINI_FALLBACK_MODELS")
+        self.gemini_timeout_seconds = int(os.getenv("GEMINI_TIMEOUT_SECONDS", "40"))
 
         self.oauth = {
             "google": (os.getenv("GOOGLE_CLIENT_ID", ""), os.getenv("GOOGLE_CLIENT_SECRET", "")),

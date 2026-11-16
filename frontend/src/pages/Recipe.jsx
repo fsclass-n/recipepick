@@ -58,7 +58,7 @@ function RecipeCard({ recipe }) {
         <div className="flex flex-wrap gap-1.5">
           <span className="chip bg-white/20"><i className={`fa-solid ${health.icon}`} />{health.label}</span>
           <span className={`chip ${recipe.source === "gemini" ? "bg-sky-400/30" : "bg-amber-400/30"}`}>
-            <i className={`fa-solid ${recipe.source === "gemini" ? "fa-wand-magic-sparkles" : "fa-book"}`} />{recipe.source === "gemini" ? "Gemini AI 창작" : "기본 템플릿 (API 키 미설정)"}
+            <i className={`fa-solid ${recipe.source === "gemini" ? "fa-wand-magic-sparkles" : "fa-book"}`} />{recipe.source === "gemini" ? `Gemini AI 창작${d.model ? ` · ${d.model}` : ""}` : d.fallback_reason === "no_api_key" ? "기본 템플릿 (API 키 미설정)" : "기본 템플릿 (AI 응답 지연·실패)"}
           </span>
         </div>
         <h2 className="mt-3 text-2xl sm:text-3xl">{d.title}</h2>

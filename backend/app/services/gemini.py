@@ -102,18 +102,30 @@ def _build_prompt(
 """
 
 
-def _call_gemini(prompt: str) -> dict:
+# 설정 모델이 단종(404)·과부하(503)·시간 초과일 때 순서대로 시도하는 대체 모델
+FALLBACK_MODELS = ("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash")
+
+
+def _model_chain() -> list[str]:
+    return list(dict.fromkeys([settings.gemini_model, *settings.gemini_fallback_models, *FALLBACK_MODELS]))
+
+
+def _call_gemini(prompt: str, model: str) -> dict:
     from google import genai
     from google.genai import types
 
-    client = genai.Client(api_key=settings.gemini_api_key)
+    client = genai.Client(
+        api_key=settings.gemini_api_key,
+        http_options=types.HttpOptions(timeout=settings.gemini_timeout_seconds * 1000),
+    )
     response = client.models.generate_content(
-        model=settings.gemini_model,
+        model=model,
         contents=prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=RECIPE_SCHEMA,
             temperature=0.7,
+            thinking_config=types.ThinkingConfig(thinking_level="low"),
         ),
     )
     text = response.text or ""
@@ -187,12 +199,16 @@ def create_recipe(
     """return: (recipe_dict, source) — source 는 'gemini' 또는 'fallback'"""
     if not settings.gemini_api_key:
         log.info("GEMINI_API_KEY 미설정 → fallback 레시피 사용")
-        return _fallback_recipe(fridge, deals, health_type, servings, max_minutes), "fallback"
-    try:
-        prompt = _build_prompt(fridge, deals, health_type, servings, max_minutes, notes, daily_kcal)
-        data = _call_gemini(prompt)
-        data.setdefault("servings", servings)
-        return data, "gemini"
-    except Exception as e:
-        log.warning("Gemini 호출 실패 → fallback 레시피 사용: %s", e)
-        return _fallback_recipe(fridge, deals, health_type, servings, max_minutes), "fallback"
+        data = _fallback_recipe(fridge, deals, health_type, servings, max_minutes)
+        return {**data, "fallback_reason": "no_api_key"}, "fallback"
+    prompt = _build_prompt(fridge, deals, health_type, servings, max_minutes, notes, daily_kcal)
+    for model in _model_chain():
+        try:
+            data = _call_gemini(prompt, model)
+            data.setdefault("servings", servings)
+            data["model"] = model
+            return data, "gemini"
+        except Exception as e:
+            log.warning("Gemini(%s) 호출 실패 → 다음 모델 시도: %s", model, str(e)[:200])
+    data = _fallback_recipe(fridge, deals, health_type, servings, max_minutes)
+    return {**data, "fallback_reason": "ai_error"}, "fallback"
