@@ -20,7 +20,8 @@
 
 ## Deploy
 - Push to `main` auto-deploys via platform Git integrations (no deploy hooks): Render (`render.yaml`, `autoDeployTrigger: commit`) and Netlify (`netlify.toml`).
-- GitHub Actions: `ci.yml` (tests/build/docker), `pages.yml` (pages/ → GitHub Pages; requires Pages source = GitHub Actions).
+- GitHub Actions: `ci.yml` (tests/build/docker).
+- GitHub Pages: deployed from the main branch root → root `index.html` (single-file portfolio) + `assets/` + `.nojekyll`. Edit works/videos via the config arrays at the top of the `<script>` in `index.html`.
 
 ## Video (docs/video)
 - Rebuild the 10-min presentation/demo video with `docs/video/tools/` (tts.py → export_slides.ps1 → record_demo.py → compose.py → check_final.py → gen_guide.py). Scene script/timing lives only in `tools/scenes.py`.

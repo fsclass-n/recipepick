@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>RecipePick · 홍기흥 포트폴리오 | RPA × Gemini AI 건강 레시피 플랫폼</title>
+  <meta name="description" content="대형마트 할인 식재료를 RPA로 수집하고, 냉장고 재료와 건강 상태에 맞춰 Google Gemini가 레시피를 창작하는 1인 풀스택 프로젝트 RecipePick의 포트폴리오입니다." />
+  <meta name="author" content="홍기흥" />
+  <meta name="theme-color" content="#06110b" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="RecipePick · 홍기흥 포트폴리오" />
+  <meta property="og:description" content="RPA × Gemini AI 건강 레시피 플랫폼 — 10분 발표·시연 영상과 프로젝트 소개" />
+  <meta property="og:image" content="https://fsclass-n.github.io/recipepick/assets/img/thumb-full.jpg" />
+  <meta property="og:url" content="https://fsclass-n.github.io/recipepick/" />
+  <link rel="icon" href="frontend/public/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <style>
+    :root {
+      --bg: #06110b;
+      --bg2: #0a1a11;
+      --panel: rgba(255, 255, 255, 0.045);
+      --panel2: rgba(255, 255, 255, 0.07);
+      --line: rgba(255, 255, 255, 0.09);
+      --text: #e8f5ec;
+      --muted: #9db5a6;
+      --leaf: #22c55e;
+      --leaf-d: #16a34a;
+      --leaf-l: #bbf7d0;
+      --tomato: #f97316;
+      --tomato-l: #fdba74;
+      --sky: #38bdf8;
+      --violet: #a78bfa;
+      --radius: 20px;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font-display: "Jua", "Pretendard Variable", sans-serif;
+      --font-body: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.65;
+      word-break: keep-all; overflow-x: hidden; -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(900px 600px at 85% -10%, rgba(34, 197, 94, 0.18), transparent 60%),
+        radial-gradient(700px 500px at -10% 30%, rgba(249, 115, 22, 0.10), transparent 60%),
+        radial-gradient(800px 600px at 50% 120%, rgba(56, 189, 248, 0.08), transparent 60%);
+    }
+    a { color: inherit; text-decoration: none; }
+    img, video { display: block; max-width: 100%; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--leaf); outline-offset: 3px; border-radius: 8px; }
+    h1, h2, h3, .display { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; line-height: 1.25; }
+    .container { width: min(1200px, 100% - 40px); margin-inline: auto; }
+    .muted { color: var(--muted); }
+    .accent { color: var(--tomato); }
+    .leaf { color: var(--leaf); }
+
+    /* ---------- progress & header ---------- */
+    #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 70; background: linear-gradient(90deg, var(--leaf), var(--tomato)); }
+    header.site {
+      position: sticky; top: 0; z-index: 60; transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+      border-bottom: 1px solid transparent;
+    }
+    header.site.scrolled { background: rgba(6, 17, 11, 0.78); backdrop-filter: blur(14px); border-color: var(--line); }
+    .nav { display: flex; align-items: center; gap: 16px; height: 68px; }
+    .logo { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 24px; }
+    .logo-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: var(--leaf-d); box-shadow: 0 8px 24px rgba(22, 163, 74, 0.4); }
+    .logo .pick { color: var(--tomato); }
+    .nav-links { display: flex; gap: 4px; margin-left: auto; }
+    .nav-links a { padding: 8px 14px; border-radius: 12px; font-size: 14.5px; font-weight: 600; color: var(--muted); transition: color 0.2s, background 0.2s; }
+    .nav-links a:hover { color: var(--text); background: var(--panel); }
+    .nav-links a.active { color: #052e16; background: var(--leaf); }
+    .nav-cta { margin-left: 8px; }
+    .burger { display: none; margin-left: auto; width: 44px; height: 44px; border-radius: 12px; position: relative; }
+    .burger span { position: absolute; left: 12px; width: 20px; height: 2px; border-radius: 2px; background: var(--text); transition: transform 0.3s var(--ease), opacity 0.2s, top 0.3s var(--ease); }
+    .burger span:nth-child(1) { top: 15px; } .burger span:nth-child(2) { top: 21px; } .burger span:nth-child(3) { top: 27px; }
+    .burger.open span:nth-child(1) { top: 21px; transform: rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity: 0; transform: translateX(10px); }
+    .burger.open span:nth-child(3) { top: 21px; transform: rotate(-45deg); }
+    .drawer-bg { position: fixed; inset: 0; z-index: 64; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .drawer { position: fixed; top: 0; right: 0; z-index: 65; width: min(82%, 340px); height: 100dvh; background: var(--bg2); border-left: 1px solid var(--line);
+      transform: translateX(100%); transition: transform 0.35s var(--ease); padding: 88px 20px 24px; display: flex; flex-direction: column; gap: 6px; }
+    .drawer a { padding: 14px 14px; border-radius: 14px; font-weight: 600; display: flex; gap: 12px; align-items: center; }
+    .drawer a i { width: 20px; color: var(--leaf); }
+    .drawer a:hover, .drawer a.active { background: var(--panel2); }
+    body.menu-open .drawer { transform: translateX(0); }
+    body.menu-open .drawer-bg { opacity: 1; pointer-events: auto; }
+    body.menu-open { overflow: hidden; }
+
+    /* ---------- buttons & chips ---------- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 20px; border-radius: 14px; font-weight: 700; font-size: 15px;
+      transition: transform 0.2s var(--ease), background 0.2s, box-shadow 0.2s, border-color 0.2s; white-space: nowrap; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--leaf-d); color: #fff; box-shadow: 0 10px 30px rgba(22, 163, 74, 0.35); }
+    .btn-primary:hover { background: var(--leaf); transform: translateY(-2px); }
+    .btn-ghost { border: 1px solid var(--line); background: var(--panel); }
+    .btn-ghost:hover { border-color: rgba(34, 197, 94, 0.5); transform: translateY(-2px); }
+    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+      background: var(--panel2); border: 1px solid var(--line); color: var(--leaf-l); }
+    .chip.tomato { color: var(--tomato-l); border-color: rgba(249, 115, 22, 0.35); background: rgba(249, 115, 22, 0.1); }
+    .chip.sky { color: #bae6fd; border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.08); }
+    .chip.violet { color: #ddd6fe; border-color: rgba(167, 139, 250, 0.3); background: rgba(167, 139, 250, 0.08); }
+
+    /* ---------- hero ---------- */
+    .hero { padding: 64px 0 56px; }
+    .hero-grid { display: grid; grid-template-columns: 1.02fr 1fr; gap: 56px; align-items: center; }
+    .kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: var(--leaf-l); padding: 7px 14px; border-radius: 999px;
+      background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tomato); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); animation: ping 1.8s infinite; }
+    @keyframes ping { 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
+    .hero h1 { font-size: clamp(44px, 7vw, 84px); margin: 18px 0 6px; }
+    .hero h1 .pick { color: var(--tomato); }
+    .hero .tagline { font-family: var(--font-display); font-size: clamp(20px, 2.4vw, 28px); color: var(--leaf-l); }
+    .hero .lead { margin-top: 18px; max-width: 560px; color: var(--muted); font-size: 16.5px; }
+    .hero .owner { margin-top: 22px; display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-family: var(--font-display); font-size: 20px;
+      background: linear-gradient(135deg, var(--leaf-d), #0f5132); }
+    .hero .ctas { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .facts { margin-top: 30px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .fact { padding: 14px 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); }
+    .fact b { display: block; font-family: var(--font-display); font-size: 24px; color: var(--text); font-weight: 400; }
+    .fact span { font-size: 12.5px; color: var(--muted); }
+    .browser { position: relative; border-radius: 18px; overflow: hidden; background: #0d1f15; border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .browser-bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; background: rgba(255, 255, 255, 0.04); border-bottom: 1px solid var(--line); }
+    .browser-bar i { width: 11px; height: 11px; border-radius: 50%; background: #ef4444; }
+    .browser-bar i:nth-child(2) { background: #f59e0b; } .browser-bar i:nth-child(3) { background: #22c55e; }
+    .browser-bar span { margin-left: 10px; flex: 1; font-size: 12.5px; color: var(--muted); background: rgba(0, 0, 0, 0.25); padding: 5px 12px; border-radius: 999px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .browser video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #0d1f15; }
+    .live { position: absolute; top: 58px; left: 14px; display: inline-flex; gap: 7px; align-items: center; padding: 6px 12px; border-radius: 999px;
+      font-size: 12px; font-weight: 800; background: rgba(6, 17, 11, 0.8); border: 1px solid rgba(34, 197, 94, 0.5); color: var(--leaf-l); }
+    .float-card { position: absolute; padding: 12px 14px; border-radius: 16px; background: rgba(10, 26, 17, 0.92); border: 1px solid var(--line); box-shadow: var(--shadow);
+      display: flex; gap: 10px; align-items: center; font-size: 13px; animation: float 6s ease-in-out infinite; }
+    .float-card .ic { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--tomato); color: #fff; }
+    .float-card.a { left: -26px; bottom: -22px; }
+    .float-card.b { right: -18px; top: -20px; animation-delay: 1.5s; }
+    .float-card.b .ic { background: #7c3aed; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    /* ---------- sections ---------- */
+    section.block { padding: 96px 0; position: relative; }
+    .sec-head { max-width: 760px; margin-bottom: 40px; }
+    .sec-head.center { margin-inline: auto; text-align: center; }
+    .eyebrow { font-size: 13px; font-weight: 800; letter-spacing: 0.12em; color: var(--leaf); }
+    .sec-head h2 { font-size: clamp(30px, 4.2vw, 46px); margin-top: 8px; }
+    .sec-head p { margin-top: 12px; color: var(--muted); font-size: 16.5px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+
+    /* ---------- video player (thumbnail → inline video) ---------- */
+    .media { position: relative; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #0d1f15; isolation: isolate; }
+    .media .thumb { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: opacity 0.35s var(--ease); }
+    .media .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease), filter 0.3s; }
+    .media .thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.55)); }
+    .media .thumb:hover img { transform: scale(1.04); filter: brightness(1.05); }
+    .play { position: absolute; z-index: 2; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; display: grid; place-items: center;
+      background: rgba(22, 163, 74, 0.92); color: #fff; font-size: 24px; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); transition: transform 0.25s var(--ease); animation: pulse 2.4s infinite; }
+    .play i { margin-left: 4px; }
+    .media .thumb:hover .play { transform: scale(1.1); }
+    @keyframes pulse { 70% { box-shadow: 0 0 0 18px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+    .badge-time { position: absolute; z-index: 2; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 700;
+      background: rgba(0, 0, 0, 0.7); font-variant-numeric: tabular-nums; }
+    .badge-label { position: absolute; z-index: 2; left: 12px; top: 12px; }
+    .media video { position: absolute; inset: 0; width: 100%; height: 100%; background: #000; opacity: 0; transition: opacity 0.4s var(--ease); }
+    .media.playing video { opacity: 1; }
+    .media.playing .thumb { opacity: 0; pointer-events: none; }
+    .media .close { position: absolute; z-index: 4; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 10px; display: none; place-items: center;
+      background: rgba(0, 0, 0, 0.6); color: #fff; }
+    .media.playing .close { display: grid; }
+    .media .spinner { position: absolute; z-index: 3; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: var(--leaf); animation: spin 0.9s linear infinite; display: none; }
+    .media.loading .spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .media .endcap, .media .err { position: absolute; z-index: 5; inset: 0; display: none; place-items: center; text-align: center; padding: 16px;
+      background: rgba(6, 17, 11, 0.86); backdrop-filter: blur(4px); }
+    .media.ended .endcap, .media.failed .err { display: grid; }
+    .endcap .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+    .endcap p, .err p { font-weight: 700; }
+
+    /* ---------- showreel ---------- */
+    .reel { display: grid; grid-template-columns: 1.7fr 1fr; gap: 24px; align-items: start; }
+    .reel-main { padding: 14px; }
+    .reel-main .info { padding: 18px 8px 8px; }
+    .reel-main h3 { font-size: 26px; }
+    .chapters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .chapters button { padding: 7px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; background: var(--panel2); border: 1px solid var(--line); transition: border-color 0.2s, background 0.2s; }
+    .chapters button:hover { border-color: var(--leaf); }
+    .chapters button.on { background: rgba(34, 197, 94, 0.16); border-color: var(--leaf); color: var(--leaf-l); }
+    .chapters time { color: var(--tomato-l); font-variant-numeric: tabular-nums; margin-right: 6px; }
+    .reel-side { display: grid; gap: 16px; }
+    .reel-side .card { padding: 14px; }
+    .reel-side h4 { font-size: 17px; margin: 12px 4px 4px; font-family: var(--font-display); font-weight: 400; }
+    .reel-side p { font-size: 14px; color: var(--muted); margin: 0 4px 4px; }
+    .compare { padding: 20px; }
+    .compare table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+    .compare th, .compare td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .compare th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
+
+    /* ---------- works grid ---------- */
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .filters button { padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); transition: all 0.2s; }
+    .filters button.on, .filters button:hover { color: #052e16; background: var(--leaf); border-color: var(--leaf); }
+    .works { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .work { padding: 12px; display: flex; flex-direction: column; transition: transform 0.35s var(--ease), border-color 0.3s, box-shadow 0.3s; }
+    .work:hover { transform: translateY(-4px); border-color: rgba(34, 197, 94, 0.35); box-shadow: var(--shadow); }
+    .work.hide { display: none; }
+    .work .body { padding: 16px 8px 8px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .work h3 { font-size: 21px; }
+    .work p { font-size: 14.5px; color: var(--muted); }
+    .work ul { list-style: none; display: grid; gap: 6px; font-size: 13.5px; }
+    .work li { display: flex; gap: 8px; }
+    .work li i { color: var(--leaf); margin-top: 4px; font-size: 11px; }
+    .work .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+
+    /* ---------- project ---------- */
+    .problems { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .problem { padding: 24px; }
+    .problem .num { font-family: var(--font-display); font-size: 15px; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; margin-bottom: 14px; }
+    .problem h3 { font-size: 21px; }
+    .problem p { margin-top: 8px; color: var(--muted); font-size: 14.5px; }
+    .solution { margin-top: 18px; padding: 24px 28px; border-radius: var(--radius); display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px;
+      background: linear-gradient(135deg, rgba(22, 163, 74, 0.28), rgba(15, 81, 50, 0.35)); border: 1px solid rgba(34, 197, 94, 0.35); }
+    .solution h3 { font-size: 24px; }
+    .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .flow span { padding: 8px 14px; border-radius: 12px; background: rgba(6, 17, 11, 0.5); font-weight: 700; font-size: 14px; }
+    .flow i { color: var(--tomato); font-size: 12px; }
+    .subhead { font-size: 24px; margin: 64px 0 20px; display: flex; align-items: center; gap: 10px; }
+    .subhead i { color: var(--leaf); font-size: 20px; }
+    .timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; position: relative; }
+    .timeline::before { content: ""; position: absolute; top: 26px; left: 8%; right: 8%; height: 2px; background: linear-gradient(90deg, var(--leaf-d), var(--tomato)); opacity: 0.6; }
+    .step { text-align: center; position: relative; }
+    .step .no { width: 52px; height: 52px; margin: 0 auto; border-radius: 16px; display: grid; place-items: center; font-family: var(--font-display); font-size: 18px;
+      background: var(--bg2); border: 2px solid var(--leaf-d); position: relative; }
+    .step h4 { margin-top: 12px; font-size: 17px; font-family: var(--font-display); font-weight: 400; }
+    .step p { margin-top: 6px; font-size: 13.5px; color: var(--muted); }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature { padding: 22px; display: flex; gap: 14px; }
+    .feature .ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 18px; }
+    .feature h4 { font-size: 17px; font-family: var(--font-display); font-weight: 400; }
+    .feature p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat { padding: 24px 20px; text-align: center; }
+    .stat b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 42px; color: var(--leaf); line-height: 1.1; }
+    .stat b small { font-size: 20px; color: var(--leaf-l); }
+    .stat span { font-size: 14px; color: var(--muted); }
+
+    /* ---------- tech ---------- */
+    .stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .stack .card { padding: 22px; }
+    .stack h4 { font-family: var(--font-display); font-weight: 400; font-size: 18px; display: flex; gap: 10px; align-items: center; }
+    .stack h4 i { color: var(--leaf); }
+    .stack p { font-size: 13.5px; color: var(--muted); margin: 8px 0 12px; }
+    .stack .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .arch { margin-top: 22px; padding: 26px; display: grid; grid-template-columns: 1fr auto 1.4fr auto 1fr; gap: 14px; align-items: center; }
+    .arch .node { padding: 16px; border-radius: 16px; background: rgba(0, 0, 0, 0.22); border: 1px solid var(--line); }
+    .arch .node.core { background: rgba(22, 163, 74, 0.16); border-color: rgba(34, 197, 94, 0.45); }
+    .arch .node b { display: block; font-size: 15px; }
+    .arch .node small { color: var(--muted); font-size: 12.5px; display: block; margin-top: 4px; }
+    .arch .node ul { list-style: none; margin-top: 8px; display: grid; gap: 4px; font-size: 13px; }
+    .arch .arrow { color: var(--tomato); font-size: 20px; text-align: center; }
+    .arch .stackv { display: grid; gap: 10px; }
+
+    /* ---------- troubleshooting ---------- */
+    .cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .case { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+    .case header { padding: 18px 22px; font-family: var(--font-display); font-size: 19px; display: flex; gap: 10px; align-items: center; }
+    .case dl { padding: 6px 22px 22px; display: grid; gap: 12px; }
+    .case dt { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; color: var(--muted); }
+    .case dd { font-size: 14px; margin-top: 2px; }
+    .case dd.fix { color: var(--leaf-l); font-weight: 600; }
+
+    /* ---------- links ---------- */
+    .links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .link { padding: 22px; display: flex; gap: 14px; align-items: center; transition: transform 0.3s var(--ease), border-color 0.3s; }
+    .link:hover { transform: translateY(-3px); border-color: rgba(34, 197, 94, 0.45); }
+    .link .ic { flex: none; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 19px; background: var(--panel2); color: var(--leaf); }
+    .link b { display: block; }
+    .link small { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+    .link .go { margin-left: auto; color: var(--muted); }
+    .accounts { margin-top: 18px; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; font-size: 14px; }
+    .accounts code { font-family: Consolas, monospace; background: rgba(0, 0, 0, 0.3); padding: 3px 8px; border-radius: 8px; color: var(--leaf-l); }
+
+    footer.site { border-top: 1px solid var(--line); padding: 36px 0 48px; color: var(--muted); font-size: 13.5px; }
+    footer .row { display: flex; flex-wrap: wrap; gap: 14px 24px; justify-content: space-between; align-items: center; }
+    #toTop { position: fixed; right: 20px; bottom: 20px; z-index: 50; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--leaf-d); color: #fff; box-shadow: 0 12px 30px rgba(22, 163, 74, 0.45); opacity: 0; transform: translateY(16px); pointer-events: none; transition: all 0.3s var(--ease); }
+    #toTop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+    /* ---------- reveal ---------- */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+    .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 1080px) {
+      .hero-grid, .reel { grid-template-columns: 1fr; }
+      .works, .features, .stack, .links, .cases, .problems { grid-template-columns: repeat(2, 1fr); }
+      .arch { grid-template-columns: 1fr; }
+      .arch .arrow { transform: rotate(90deg); }
+      .float-card.a { left: 10px; } .float-card.b { right: 10px; }
+    }
+    @media (max-width: 900px) {
+      .nav-links, .nav-cta { display: none; }
+      .burger { display: block; }
+      .timeline { grid-template-columns: 1fr; gap: 18px; }
+      .timeline::before { top: 0; bottom: 0; left: 25px; right: auto; width: 2px; height: auto; }
+      .step { display: grid; grid-template-columns: 52px 1fr; gap: 0 16px; text-align: left; }
+      .step h4 { margin-top: 2px; }
+      .step p { grid-column: 2; margin-top: 2px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      section.block { padding: 72px 0; }
+      .hero { padding-top: 36px; }
+      .facts { grid-template-columns: repeat(2, 1fr); }
+      .works, .features, .stack, .links, .cases, .problems { grid-template-columns: 1fr; }
+      .float-card { display: none; }
+      .play { width: 60px; height: 60px; margin: -30px 0 0 -30px; font-size: 20px; }
+      .compare { overflow-x: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="progress" aria-hidden="true"></div>
+
+  <header class="site" id="top">
+    <div class="container nav">
+      <a href="#home" class="logo" aria-label="RecipePick 포트폴리오 처음으로">
+        <span class="logo-mark"><i class="fa-solid fa-leaf"></i></span>Recipe<span class="pick">Pick</span>
+      </a>
+      <nav class="nav-links" aria-label="섹션 이동"></nav>
+      <a class="btn btn-primary nav-cta" href="https://recipepick.onrender.com" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i>서비스</a>
+      <button class="burger" id="burger" aria-label="메뉴 열기" aria-expanded="false" aria-controls="drawer"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <div class="drawer-bg" id="drawerBg"></div>
+  <aside class="drawer" id="drawer" aria-label="모바일 메뉴"></aside>
+
+  <main>
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="reveal">
+          <span class="kicker"><span class="dot"></span>1인 풀스택 프로젝트 · 실제 운영 중</span>
+          <h1>Recipe<span class="pick">Pick</span></h1>
+          <p class="tagline">마트 마감세일 × 내 냉장고 × 내 건강<br />= AI가 창작하는 오늘의 한끼</p>
+          <p class="lead">대형마트 할인 식재료를 RPA(Playwright)로 수집하고, 냉장고 재료와 건강 상태(당뇨·다이어트·고혈압 등)에 맞춰 Google Gemini가 레시피를 창작하는 푸드테크 플랫폼입니다. 기획부터 배포·영상 제작까지 혼자 진행했습니다.</p>
+          <div class="owner">
+            <span class="avatar">홍</span>
+            <div><b>홍기흥</b> <span class="muted">· Full-stack Developer</span><br /><span class="muted" style="font-size:13.5px">팀 구성 (1인 프로젝트)</span></div>
+          </div>
+          <div class="ctas">
+            <a class="btn btn-primary" href="#video"><i class="fa-solid fa-play"></i>10분 발표·시연 보기</a>
+            <a class="btn btn-ghost" href="https://recipepick.onrender.com" target="_blank" rel="noopener"><i class="fa-solid fa-utensils"></i>서비스 체험</a>
+            <a class="btn btn-ghost" href="https://github.com/fsclass-n/recipepick" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>GitHub</a>
+          </div>
+          <div class="facts">
+            <div class="fact"><b>3곳</b><span>Render·Netlify 배포</span></div>
+            <div class="fact"><b>12개</b><span>pytest 자동 검증</span></div>
+            <div class="fact"><b>5종</b><span>건강 맞춤 타입</span></div>
+            <div class="fact"><b>10분</b><span>발표·시연 영상</span></div>
+          </div>
+        </div>
+        <div class="reveal d2" style="position:relative">
+          <div class="browser">
+            <div class="browser-bar"><i></i><i></i><i></i><span>🔒 recipepick.onrender.com</span></div>
+            <video id="heroVideo" muted loop playsinline preload="metadata" poster="assets/img/thumb-compare.jpg" aria-label="RecipePick 실제 화면 미리보기(무음 반복)">
+              <source src="assets/video/hero_loop.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <span class="live"><span class="dot" style="background:#22c55e"></span>실제 운영 화면</span>
+          <div class="float-card a"><span class="ic"><i class="fa-solid fa-bell"></i></span><div><b>마감세일 매칭</b><br /><span class="muted">WebSocket 실시간 알림</span></div></div>
+          <div class="float-card b"><span class="ic"><i class="fa-solid fa-wand-magic-sparkles"></i></span><div><b>Gemini 레시피</b><br /><span class="muted">JSON 구조화 출력</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SHOWREEL ================= -->
+    <section class="block" id="video">
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="eyebrow">SHOWREEL</p>
+          <h2>10분 발표·시연 영상</h2>
+          <p>PPT 기술 발표와 실제 운영 사이트 시연을 하나로 담았습니다. 썸네일을 누르면 이 자리에서 바로 재생되고, 아래 챕터를 누르면 원하는 장면으로 이동합니다.</p>
+        </div>
+        <div class="reel">
+          <div class="card reel-main reveal">
+            <div class="media" id="featured"></div>
+            <div class="info">
+              <h3>RecipePick 발표·시연 — 일반 회원 vs 관리자</h3>
+              <p class="muted" style="margin-top:6px">1920×1080 원본을 웹용 720p로 변환 · 한국어 자막 포함 · 내레이션은 AI 합성 음성(ko-KR Neural)</p>
+              <div class="chapters" id="chapters" aria-label="챕터 이동"></div>
+            </div>
+          </div>
+          <div class="reel-side">
+            <div class="card reveal d1">
+              <div class="media" id="highlight"></div>
+              <h4>60초 하이라이트</h4>
+              <p>Gemini AI 레시피 생성 구간 — 할인 재료 태그, 당뇨 기준 영양 막대, 조리 단계 체크</p>
+            </div>
+            <div class="card compare reveal d2">
+              <h4 class="display" style="font-size:18px"><i class="fa-solid fa-user-shield leaf"></i> 영상 속 두 계정 비교</h4>
+              <table>
+                <thead><tr><th>항목</th><th>일반 회원</th><th>관리자</th></tr></thead>
+                <tbody>
+                  <tr><td>메뉴</td><td>대시보드·냉장고·할인·AI 레시피</td><td>+ 관리자 메뉴</td></tr>
+                  <tr><td>/admin</td><td>대시보드로 이동 · API <b class="accent">403</b></td><td>관리자 대시보드</td></tr>
+                  <tr><td>권한 변경</td><td>WebSocket으로 즉시 반영</td><td>건강 타입·권한 변경</td></tr>
+                  <tr><td>자기 권한</td><td>—</td><td>스위치 잠금 (서버 400)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= WORKS ================= -->
+    <section class="block" id="works">
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="eyebrow">WORKS</p>
+          <h2>장면별 작품 소개</h2>
+          <p>영상의 각 장면을 기능 단위로 나눴습니다. 썸네일을 누르면 해당 구간만 그 자리에서 재생되고, 끝나면 다시 보거나 썸네일로 돌아갈 수 있습니다.</p>
+        </div>
+        <div class="filters reveal" id="filters" role="tablist" aria-label="작품 분류"></div>
+        <div class="works" id="worksGrid"></div>
+      </div>
+    </section>
+
+    <!-- ================= PROJECT ================= -->
+    <section class="block" id="project">
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="eyebrow">PROJECT</p>
+          <h2>기획 의도부터 성과까지</h2>
+          <p>‘무엇을, 어디서, 어떻게 먹을지’를 매번 사람이 직접 찾아야 하는 문제에서 출발했습니다.</p>
+        </div>
+        <div class="problems">
+          <div class="card problem reveal"><div class="num" style="background:rgba(249,115,22,.15);color:var(--tomato-l)">01</div><h3>할인 정보의 파편화</h3><p>마트별 사이트·앱에 흩어진 할인 정보, 시간 한정 마감세일을 직접 비교해야 합니다.</p></div>
+          <div class="card problem reveal d1"><div class="num" style="background:rgba(56,189,248,.14);color:#bae6fd">02</div><h3>냉장고 재료의 낭비</h3><p>유통기한 관리가 안 되고, ‘있는 재료로 뭘 만들지’를 매번 고민합니다.</p></div>
+          <div class="card problem reveal d2"><div class="num" style="background:rgba(167,139,250,.14);color:#ddd6fe">03</div><h3>건강과 레시피의 단절</h3><p>당뇨·고혈압 같은 식단 제약을 반영한 레시피를 찾기 어렵습니다.</p></div>
+        </div>
+        <div class="solution reveal">
+          <div><p class="eyebrow" style="color:var(--leaf-l)">기획 의도</p><h3>찾는 수고는 RPA가, 고민은 AI가</h3></div>
+          <div class="flow"><span>수집 자동화</span><i class="fa-solid fa-chevron-right"></i><span>냉장고 매칭</span><i class="fa-solid fa-chevron-right"></i><span>건강 맞춤 레시피</span><i class="fa-solid fa-chevron-right"></i><span>즉시 알림</span></div>
+        </div>
+
+        <h3 class="subhead reveal"><i class="fa-solid fa-route"></i>제작 과정 — 5단계 산출물 관리</h3>
+        <div class="timeline">
+          <div class="step reveal"><div class="no">01</div><h4>기획·분석</h4><p>문제 정의, 요구사항, 수집 대상 마트 정책 조사</p></div>
+          <div class="step reveal d1"><div class="no">02</div><h4>설계</h4><p>4계층 아키텍처, DB 6테이블, API·화면 설계</p></div>
+          <div class="step reveal d2"><div class="no">03</div><h4>구현</h4><p>FastAPI·React·RPA·Gemini 통합, pytest 12개</p></div>
+          <div class="step reveal d3"><div class="no">04</div><h4>배포</h4><p>Docker·Render·Netlify 분리 배포, GitHub Actions CI</p></div>
+          <div class="step reveal"><div class="no">05</div><h4>피드백</h4><p>운영 장애 대응, 발표자료 16장·10분 영상 제작</p></div>
+        </div>
+
+        <h3 class="subhead reveal"><i class="fa-solid fa-star"></i>핵심 기능</h3>
+        <div class="features">
+          <div class="card feature reveal"><span class="ic" style="background:rgba(34,197,94,.15);color:var(--leaf)"><i class="fa-solid fa-robot"></i></span><div><h4>RPA 할인 수집 · 자동 매칭</h4><p>robots.txt 확인 → Playwright 렌더링 → BS4 파싱 → 검증 → TiDB 적재 → 냉장고·장바구니 매칭</p></div></div>
+          <div class="card feature reveal d1"><span class="ic" style="background:rgba(167,139,250,.15);color:var(--violet)"><i class="fa-solid fa-wand-magic-sparkles"></i></span><div><h4>Gemini 건강 맞춤 레시피</h4><p>건강 기준·재료·알레르기·목표 열량을 조합하고 response_schema로 JSON 응답을 강제, 모델 체인 + fallback</p></div></div>
+          <div class="card feature reveal d2"><span class="ic" style="background:rgba(249,115,22,.15);color:var(--tomato)"><i class="fa-solid fa-tower-broadcast"></i></span><div><h4>실시간 알림 · 대시보드</h4><p>마감세일 매칭 시 WebSocket 푸시와 텔레그램·디스코드·이메일 웹훅</p></div></div>
+          <div class="card feature reveal"><span class="ic" style="background:rgba(56,189,248,.14);color:var(--sky)"><i class="fa-solid fa-user-shield"></i></span><div><h4>관리자 백오피스 (RBAC)</h4><p>크롤러 주기·모드 제어, pandas·Plotly 통계, 회원 권한 변경과 자기 강등 차단</p></div></div>
+          <div class="card feature reveal d1"><span class="ic" style="background:rgba(34,197,94,.15);color:var(--leaf)"><i class="fa-solid fa-mobile-screen"></i></span><div><h4>상용 수준 UI/UX</h4><p>공개 메인페이지, 테스트 계정 원클릭 로그인, 구글·네이버·카카오 OAuth, 다크 모드, 모바일 Drawer</p></div></div>
+          <div class="card feature reveal d2"><span class="ic" style="background:rgba(249,115,22,.15);color:var(--tomato)"><i class="fa-solid fa-rocket"></i></span><div><h4>자동 배포 파이프라인</h4><p>main push → Render(Docker·Static)·Netlify 자동 배포, CI는 테스트·빌드·Docker 이미지 검증</p></div></div>
+        </div>
+
+        <h3 class="subhead reveal"><i class="fa-solid fa-trophy"></i>주요 성과</h3>
+        <div class="stats">
+          <div class="card stat reveal"><b data-count="3">0</b><span>운영 배포 환경<br />(Render API·Static, Netlify)</span></div>
+          <div class="card stat reveal d1"><b data-count="12">0</b><span>pytest 자동 테스트 통과<br />CI 3개 job</span></div>
+          <div class="card stat reveal d2"><b data-count="50"><small>약 </small>0</b><span>크롤링 1회 수집 건수<br />(1시간 주기)</span></div>
+          <div class="card stat reveal d3"><b data-count="16">0</b><span>장 발표자료 + 10분 영상<br />(자막·대본 포함)</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TECH ================= -->
+    <section class="block" id="tech">
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="eyebrow">TECH STACK</p>
+          <h2>기술 선택과 아키텍처</h2>
+          <p>나열이 아니라 대안과 비교해 고른 기술입니다.</p>
+        </div>
+        <div class="stack">
+          <div class="card reveal"><h4><i class="fa-brands fa-react"></i>Frontend</h4><p>빠른 빌드, @theme 디자인 토큰, 다크 모드</p><div class="chips"><span class="chip">React 19</span><span class="chip">Vite</span><span class="chip">Tailwind CSS v4</span><span class="chip">React Router</span><span class="chip">FontAwesome</span></div></div>
+          <div class="card reveal d1"><h4><i class="fa-solid fa-server"></i>Backend</h4><p>비동기 + WebSocket 내장, Pydantic 검증, Swagger 자동 문서</p><div class="chips"><span class="chip">Python 3.11</span><span class="chip">FastAPI</span><span class="chip">SQLAlchemy 2</span><span class="chip">JWT · bcrypt</span><span class="chip">OAuth 3사</span></div></div>
+          <div class="card reveal d2"><h4><i class="fa-solid fa-database"></i>Data</h4><p>무상태 컨테이너 재시작에도 데이터 유지, TLS 인증서 검증</p><div class="chips"><span class="chip">TiDB Cloud</span><span class="chip">pandas</span><span class="chip">NumPy</span><span class="chip">Plotly</span></div></div>
+          <div class="card reveal"><h4><i class="fa-solid fa-robot"></i>RPA</h4><p>JS로 렌더링되는 마트 페이지 대응, 파싱은 BS4로 분리해 단위 테스트</p><div class="chips"><span class="chip tomato">Playwright</span><span class="chip tomato">BeautifulSoup4</span><span class="chip tomato">robots.txt</span></div></div>
+          <div class="card reveal d1"><h4><i class="fa-solid fa-wand-magic-sparkles"></i>Generative AI</h4><p>구조화 출력으로 파싱 오류 제거, 단종·과부하 대비 모델 체인</p><div class="chips"><span class="chip violet">Google Gemini</span><span class="chip violet">response_schema</span><span class="chip violet">fallback</span></div></div>
+          <div class="card reveal d2"><h4><i class="fa-solid fa-cloud"></i>DevOps</h4><p>Chromium 의존성 고정, 프런트·백엔드 독립 배포</p><div class="chips"><span class="chip sky">Docker</span><span class="chip sky">Render</span><span class="chip sky">Netlify</span><span class="chip sky">GitHub Actions</span></div></div>
+        </div>
+        <div class="card arch reveal">
+          <div class="node"><b><i class="fa-solid fa-display leaf"></i> Client</b><small>React SPA</small><ul><li>Render Static · Production</li><li>Netlify · Staging</li></ul></div>
+          <div class="arrow"><i class="fa-solid fa-right-left"></i></div>
+          <div class="node core"><b><i class="fa-brands fa-docker"></i> API Server · Render (Docker)</b><small>python:3.11-slim + Playwright Chromium</small><ul><li>FastAPI Routers · JWT · WebSocket</li><li>CrawlerService (asyncio 스케줄러 · Lock · 작업 로그)</li><li>Gemini Service · Notifier</li></ul></div>
+          <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="stackv"><div class="node"><b>TiDB Cloud</b><small>MySQL 호환 · TLS</small></div><div class="node"><b>Gemini API</b><small>JSON 스키마</small></div><div class="node"><b>대형마트 웹</b><small>robots.txt 준수</small></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TROUBLESHOOTING ================= -->
+    <section class="block" id="solve">
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="eyebrow">PROBLEM SOLVING</p>
+          <h2>실제로 겪은 문제와 해결</h2>
+          <p>문제 → 원인 → 해결 → 검증 순서로 정리했습니다.</p>
+        </div>
+        <div class="cases">
+          <article class="card case reveal">
+            <header style="background:rgba(22,163,74,.22)"><i class="fa-solid fa-spider"></i>크롤링 정책과 데이터 정합성</header>
+            <dl>
+              <div><dt>문제</dt><dd>이마트 봇 차단 · 롯데ON robots 비허용, 홈플러스 할인율 99%, 두부가 ‘채소’로 분류</dd></div>
+              <div><dt>원인</dt><dd>‘50%’ 텍스트를 판매가로 파싱, ‘풀무원’의 ‘무’가 채소 키워드에 부분 일치</dd></div>
+              <div><dt>해결</dt><dd class="fix">우회 대신 수집 정책 + DEMO 표기, 셀렉터 수정 + 가격 이상치 검증, 최장 일치 분류 · 비식품 필터</dd></div>
+              <div><dt>검증</dt><dd>HTML 픽스처 단위 테스트, 실데이터 스팟 체크</dd></div>
+            </dl>
+          </article>
+          <article class="card case reveal d1">
+            <header style="background:rgba(124,58,237,.25)"><i class="fa-solid fa-microchip"></i>AI 모델 단종 (배포 후 발견)</header>
+            <dl>
+              <div><dt>문제</dt><dd>레시피가 전부 기본 템플릿으로 대체되고 화면에는 ‘API 키 미설정’으로 잘못 표시</dd></div>
+              <div><dt>원인</dt><dd>사용하던 Gemini 모델이 신규 사용자 제공 중단(404), 대체 모델도 일시 과부하(503)</dd></div>
+              <div><dt>해결</dt><dd class="fix">모델 체인 순차 대체 + 40초 타임아웃, 실패 사유(키 없음/AI 실패) 구분 표시</dd></div>
+              <div><dt>검증</dt><dd>단위 테스트 2개 추가, 운영 API에서 실제 Gemini 생성 확인</dd></div>
+            </dl>
+          </article>
+          <article class="card case reveal d2">
+            <header style="background:rgba(249,115,22,.22)"><i class="fa-solid fa-cloud-bolt"></i>클라우드 배포 환경</header>
+            <dl>
+              <div><dt>문제</dt><dd>Render 프런트가 localhost:8000 호출, API 무응답·크롤링 작업 중단</dd></div>
+              <div><dt>원인</dt><dd>Static Site에 API 주소 변수 누락, (가설) 512MB 무료 인스턴스 + Chromium 메모리</dd></div>
+              <div><dt>해결</dt><dd class="fix">운영 빌드 API 주소 기본값, 분석 라이브러리 지연 로드 · Chromium 저메모리 옵션 · 중단 작업 자동 정리</dd></div>
+              <div><dt>검증</dt><dd>번들 내 API 주소 확인, /api/health 200 · 운영 로그인 확인</dd></div>
+            </dl>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= LINKS ================= -->
+    <section class="block" id="links">
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="eyebrow">LINKS</p>
+          <h2>직접 확인해 보세요</h2>
+          <p>Render 무료 인스턴스는 첫 접속 시 깨어나는 데 최대 1분이 걸릴 수 있습니다.</p>
+        </div>
+        <div class="links" id="linkGrid"></div>
+        <div class="card accounts reveal">
+          <b><i class="fa-solid fa-key leaf"></i> 테스트 계정</b>
+          <span>일반 회원(당뇨 관리) <code>user@recipepick.dev</code> / <code>Recipe!2026</code></span>
+          <span>관리자 <code>admin@recipepick.dev</code> / <code>Admin!2026</code></span>
+          <span class="muted">로그인 화면의 테스트 버튼으로 바로 입장할 수 있습니다.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site">
+    <div class="container row">
+      <a href="#home" class="logo" style="font-size:20px"><span class="logo-mark" style="width:32px;height:32px"><i class="fa-solid fa-leaf"></i></span>Recipe<span class="pick">Pick</span></a>
+      <span>팀 구성 (1인 프로젝트): 홍기흥 (Full-stack Developer) · <a href="mailto:whyeil@naver.com">whyeil@naver.com</a></span>
+      <span>© 2026 RecipePick · 영상 내레이션은 AI 합성 음성입니다.</span>
+    </div>
+  </footer>
+  <button id="toTop" aria-label="맨 위로"><i class="fa-solid fa-arrow-up"></i></button>
+
+  <noscript>
+    <p style="padding:16px;text-align:center">이 페이지의 영상 재생에는 JavaScript가 필요합니다. <a href="assets/video/recipepick_full_720p.mp4" style="color:#22c55e">10분 영상 바로 보기</a></p>
+  </noscript>
+
+  <script>
+    /* =====================================================================
+       콘텐츠 설정 — 영상·썸네일·작품은 이 영역만 수정하면 됩니다.
+       - 영상: 저장소 상대 경로(assets/…) 또는 외부 URL(https://…mp4) 모두 가능
+       - start/end(초): 같은 영상 파일의 일부 구간만 재생 (end 가 없으면 끝까지)
+       ===================================================================== */
+    const MEDIA = {
+      full: "assets/video/recipepick_full_720p.mp4",       // 10분 발표·시연 (웹용 720p)
+      highlight: "assets/video/recipepick_highlight.mp4",  // 60초 하이라이트
+    };
+
+    const FEATURED = { id: "full", title: "10분 발표·시연 전체", video: MEDIA.full, thumb: "assets/img/thumb-full.jpg", start: 0, label: "전체 10:00" };
+    const HIGHLIGHT = { id: "highlight", title: "60초 하이라이트", video: MEDIA.highlight, thumb: "assets/img/thumb-recipe.jpg", start: 0, label: "01:00" };
+
+    const CHAPTERS = [
+      { t: 0, label: "PPT 발표" }, { t: 180, label: "운영 서비스" }, { t: 210, label: "일반 회원" },
+      { t: 305, label: "AI 레시피" }, { t: 370, label: "관리자 차단 403" }, { t: 390, label: "관리자" },
+      { t: 475, label: "두 계정 비교" }, { t: 520, label: "API 문서·CI" }, { t: 540, label: "회고" },
+    ];
+
+    const CATEGORIES = { all: "전체", tech: "기술 발표", user: "일반 회원", admin: "관리자·운영" };
+
+    const WORKS = [
+      { id: "ppt", cat: "tech", title: "기술 발표 — 아키텍처와 의사결정", video: MEDIA.full, start: 0, end: 180, thumb: "assets/img/thumb-ppt.jpg",
+        desc: "문제 정의부터 4계층 아키텍처, 기술 선정 근거, RPA·Gemini 설계, 트러블슈팅까지 16장 발표자료로 설명합니다.",
+        points: ["대안 비교 기반 기술 선정 (TiDB · Playwright · FastAPI)", "Gemini 모델 단종 대응 사례"], tags: ["PPT", "Architecture", "Why"] },
+      { id: "intro", cat: "user", title: "공개 메인페이지 · 실시간 할인 통계", video: MEDIA.full, start: 180, end: 210, thumb: "assets/img/thumb-intro.jpg",
+        desc: "로그인 전 메인에서 오늘 수집한 할인 통계와 할인율 상위 식재료를 보여 줍니다. 데모 데이터는 DEMO 배지로 구분합니다.",
+        points: ["공개 헤더·푸터 · FAQ", "DEMO 표기로 데이터 투명성"], tags: ["Landing", "UX"] },
+      { id: "user", cat: "user", title: "냉장고 파먹기 · 할인 자동 매칭", video: MEDIA.full, start: 210, end: 305, thumb: "assets/img/thumb-user.jpg",
+        desc: "당뇨 관리 프로필로 로그인해 대시보드, 할인 재료 하이라이트, 마트별 최저가 장바구니 맵, 마트 할인 필터를 시연합니다.",
+        points: ["할인 매칭 재료 자동 하이라이트", "WebSocket 실시간 알림 현황판"], tags: ["React", "WebSocket", "RPA"] },
+      { id: "recipe", cat: "user", title: "Gemini 건강 맞춤 레시피 생성", video: MEDIA.full, start: 305, end: 370, thumb: "assets/img/thumb-recipe.jpg",
+        desc: "냉장고·할인 재료와 당뇨 기준을 조합해 실제 Gemini가 레시피를 생성합니다. 사용한 모델, 할인 재료 태그, 영양 기준 막대를 보여 줍니다.",
+        points: ["response_schema JSON 구조화 출력", "당뇨 기준 탄수화물 60g 비교"], tags: ["Gemini", "Prompt", "JSON"] },
+      { id: "block", cat: "user", title: "역할 기반 차단 — 관리자 API 403", video: MEDIA.full, start: 370, end: 390, thumb: "assets/img/thumb-block.jpg",
+        desc: "일반 회원이 /admin 주소를 직접 입력하면 화면은 대시보드로 돌려보내고, 서버 관리자 API는 403으로 거부합니다.",
+        points: ["클라이언트 보호 라우트", "서버 require_admin 의존성"], tags: ["RBAC", "Security"] },
+      { id: "admin", cat: "admin", title: "관리자 — RPA 크롤러 모니터링", video: MEDIA.full, start: 390, end: 475, thumb: "assets/img/thumb-admin.jpg",
+        desc: "관리자로 로그인해 지표 카드, 크롤러 주기·모드 제어, pandas 집계 Plotly 차트, 작업 로그를 확인합니다.",
+        points: ["TiDB Cloud 연결 상태 확인", "작업별 수집·매칭 로그"], tags: ["Admin", "pandas", "Plotly"] },
+      { id: "compare", cat: "admin", title: "두 계정 비교 — 실시간 권한 반영", video: MEDIA.full, start: 475, end: 520, thumb: "assets/img/thumb-compare.jpg",
+        desc: "일반 회원과 관리자 화면을 나란히 놓고, 관리자가 건강 타입을 바꾸면 일반 회원 화면에 새로고침 없이 반영되는 모습을 보여 줍니다.",
+        points: ["WebSocket profile_changed 이벤트", "자기 권한 변경 차단 · 데이터 원복"], tags: ["WebSocket", "RBAC"] },
+      { id: "ops", cat: "admin", title: "운영 근거 — API 문서와 CI", video: MEDIA.full, start: 520, end: 540, thumb: "assets/img/thumb-ops.jpg",
+        desc: "화면 뒤의 실제 FastAPI 서버 문서(/docs)와 push마다 도는 GitHub Actions 실행 기록을 보여 줍니다.",
+        points: ["Swagger 자동 문서화", "테스트 · 빌드 · Docker 이미지 검증"], tags: ["FastAPI", "CI/CD"] },
+      { id: "close", cat: "tech", title: "회고와 다음 단계", video: MEDIA.full, start: 540, end: 600, thumb: "assets/img/thumb-close.jpg",
+        desc: "‘수집할 수 있는가’보다 ‘수집해도 되는가’, 실패를 전제로 한 설계 등 1인 개발에서 얻은 인사이트와 고도화 계획입니다.",
+        points: ["공식 API 연동 · 식약처 영양 DB", "크롤러 워커 분리"], tags: ["Retrospective"] },
+    ];
+
+    const LINKS = [
+      { icon: "fa-solid fa-utensils", title: "서비스 (Production)", sub: "recipepick.onrender.com", href: "https://recipepick.onrender.com" },
+      { icon: "fa-solid fa-flask", title: "Staging (Netlify)", sub: "recipepick.netlify.app", href: "https://recipepick.netlify.app" },
+      { icon: "fa-solid fa-code", title: "API 문서 (Swagger)", sub: "recipepick-api.onrender.com/docs", href: "https://recipepick-api.onrender.com/docs" },
+      { icon: "fa-brands fa-github", title: "GitHub 저장소", sub: "github.com/fsclass-n/recipepick", href: "https://github.com/fsclass-n/recipepick" },
+      { icon: "fa-solid fa-file-powerpoint", title: "발표자료 (16장)", sub: "docs/프로젝트_발표자료.pptx", href: "https://github.com/fsclass-n/recipepick/blob/main/docs/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8_%EB%B0%9C%ED%91%9C%EC%9E%90%EB%A3%8C.pptx" },
+      { icon: "fa-solid fa-clapperboard", title: "영상 대본·연출 가이드", sub: "docs/video/영상_대본_및_연출가이드.md", href: "https://github.com/fsclass-n/recipepick/blob/main/docs/video/%EC%98%81%EC%83%81_%EB%8C%80%EB%B3%B8_%EB%B0%8F_%EC%97%B0%EC%B6%9C%EA%B0%80%EC%9D%B4%EB%93%9C.md" },
+    ];
+
+    const NAV = [
+      { href: "#video", label: "영상", icon: "fa-solid fa-play" },
+      { href: "#works", label: "작품", icon: "fa-solid fa-film" },
+      { href: "#project", label: "프로젝트", icon: "fa-solid fa-lightbulb" },
+      { href: "#tech", label: "기술", icon: "fa-solid fa-layer-group" },
+      { href: "#solve", label: "문제 해결", icon: "fa-solid fa-screwdriver-wrench" },
+      { href: "#links", label: "링크", icon: "fa-solid fa-link" },
+    ];
+
+    /* =====================================================================
+       인라인 비디오 플레이어 — 썸네일 자리에서 바로 재생
+       ===================================================================== */
+    const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+    const heroVideo = document.getElementById("heroVideo");
+    let active = null;
+
+    function createPlayer(el, item) {
+      const range = item.end != null ? `${fmt(item.start || 0)}–${fmt(item.end)}` : item.label;
+      el.innerHTML = `
+        <button class="thumb" type="button" aria-label="${item.title} 영상 재생">
+          <img src="${item.thumb}" alt="${item.title} 썸네일" loading="lazy" decoding="async" />
+          <span class="play" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+          ${range ? `<span class="badge-time">${range}</span>` : ""}
+        </button>
+        <span class="spinner" aria-hidden="true"></span>
+        <button class="close" type="button" aria-label="영상 닫고 썸네일로"><i class="fa-solid fa-xmark"></i></button>
+        <div class="endcap" role="dialog" aria-label="재생 종료"><div>
+          <p><i class="fa-solid fa-circle-check leaf"></i> 장면 재생이 끝났습니다</p>
+          <div class="row">
+            <button class="btn btn-primary" type="button" data-act="replay"><i class="fa-solid fa-rotate-right"></i>다시 재생</button>
+            <button class="btn btn-ghost" type="button" data-act="back"><i class="fa-regular fa-image"></i>썸네일로</button>
+          </div></div></div>
+        <div class="err"><div><p><i class="fa-solid fa-triangle-exclamation accent"></i> 영상을 불러오지 못했습니다</p>
+          <div class="row" style="margin-top:12px"><a class="btn btn-ghost" href="${item.video}" target="_blank" rel="noopener">파일 직접 열기</a>
+          <button class="btn btn-ghost" type="button" data-act="back">닫기</button></div></div></div>`;
+
+      let video = null;
+      const start = item.start || 0;
+      const end = item.end ?? null;
+
+      const player = {
+        el, item,
+        play(at = start) {
+          if (active && active !== player) active.reset();
+          active = player;
+          heroVideo && heroVideo.pause();
+          el.classList.remove("ended", "failed");
+          if (!video) {
+            video = document.createElement("video");
+            Object.assign(video, { controls: true, playsInline: true, preload: "auto", poster: item.thumb });
+            video.setAttribute("playsinline", "");
+            video.setAttribute("aria-label", item.title);
+            const src = document.createElement("source");
+            src.src = item.video;
+            src.type = "video/mp4";
+            video.appendChild(src);
+            el.appendChild(video);
+            el.classList.add("loading");
+            const v = video;
+            v.addEventListener("loadedmetadata", () => { v.currentTime = at; v.play().catch(() => {}); }, { once: true });
+            v.addEventListener("playing", () => el.classList.remove("loading"));
+            v.addEventListener("waiting", () => el.classList.add("loading"));
+            v.addEventListener("timeupdate", () => {
+              if (video !== v) return;
+              if (end != null && v.currentTime >= end - 0.05 && !v.paused) { v.pause(); el.classList.add("ended"); }
+              if (player.onTime) player.onTime(v.currentTime);
+            });
+            v.addEventListener("ended", () => el.classList.add("ended"));
+            v.addEventListener("error", () => { el.classList.remove("loading"); el.classList.add("failed"); }, true);
+            src.addEventListener("error", () => { el.classList.remove("loading"); el.classList.add("failed"); });
+          } else {
+            video.currentTime = at;
+            video.play().catch(() => {});
+          }
+          requestAnimationFrame(() => el.classList.add("playing"));
+          video.focus({ preventScroll: true });
+        },
+        seek(t) { if (!video) return player.play(t); video.currentTime = t; el.classList.remove("ended"); video.play().catch(() => {}); },
+        reset() {
+          if (video) { video.pause(); video.remove(); video = null; }
+          el.classList.remove("playing", "ended", "failed", "loading");
+          if (active === player) { active = null; heroVideo && !matchMedia("(prefers-reduced-motion: reduce)").matches && heroVideo.play().catch(() => {}); }
+        },
+      };
+
+      el.querySelector(".thumb").addEventListener("click", () => player.play());
+      el.querySelector(".close").addEventListener("click", () => player.reset());
+      el.addEventListener("click", (e) => {
+        const act = e.target.closest("[data-act]")?.dataset.act;
+        if (act === "replay") player.play(start);
+        if (act === "back") player.reset();
+      });
+      return player;
+    }
+
+    /* ---------- 렌더링 ---------- */
+    const featured = createPlayer(document.getElementById("featured"), FEATURED);
+    createPlayer(document.getElementById("highlight"), HIGHLIGHT);
+
+    const chapWrap = document.getElementById("chapters");
+    chapWrap.innerHTML = CHAPTERS.map((c, i) => `<button type="button" data-i="${i}"><time>${fmt(c.t)}</time>${c.label}</button>`).join("");
+    chapWrap.addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      featured.seek(CHAPTERS[+b.dataset.i].t);
+      document.getElementById("featured").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    featured.onTime = (t) => {
+      let idx = 0; CHAPTERS.forEach((c, i) => { if (t >= c.t) idx = i; });
+      chapWrap.querySelectorAll("button").forEach((b, i) => b.classList.toggle("on", i === idx));
+    };
+
+    const grid = document.getElementById("worksGrid");
+    WORKS.forEach((w, i) => {
+      const art = document.createElement("article");
+      art.className = `card work reveal ${["", "d1", "d2"][i % 3]}`;
+      art.dataset.cat = w.cat;
+      art.innerHTML = `<div class="media"></div><div class="body">
+        <span class="chip ${w.cat === "admin" ? "sky" : w.cat === "tech" ? "violet" : ""}" style="align-self:flex-start">${CATEGORIES[w.cat]}</span>
+        <h3>${w.title}</h3><p>${w.desc}</p>
+        <ul>${w.points.map((p) => `<li><i class="fa-solid fa-circle-check"></i><span>${p}</span></li>`).join("")}</ul>
+        <div class="tags">${w.tags.map((t) => `<span class="chip">${t}</span>`).join("")}</div></div>`;
+      grid.appendChild(art);
+      createPlayer(art.querySelector(".media"), w);
+    });
+
+    const filters = document.getElementById("filters");
+    filters.innerHTML = Object.entries(CATEGORIES).map(([k, v], i) =>
+      `<button type="button" role="tab" aria-selected="${i === 0}" class="${i === 0 ? "on" : ""}" data-cat="${k}">${v} <span class="muted">${k === "all" ? WORKS.length : WORKS.filter((w) => w.cat === k).length}</span></button>`).join("");
+    filters.addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      filters.querySelectorAll("button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-selected", x === b); });
+      grid.querySelectorAll(".work").forEach((a) => a.classList.toggle("hide", b.dataset.cat !== "all" && a.dataset.cat !== b.dataset.cat));
+    });
+
+    document.getElementById("linkGrid").innerHTML = LINKS.map((l, i) =>
+      `<a class="card link reveal ${["", "d1", "d2"][i % 3]}" href="${l.href}" target="_blank" rel="noopener">
+        <span class="ic"><i class="${l.icon}"></i></span><span><b>${l.title}</b><small>${l.sub}</small></span>
+        <i class="fa-solid fa-arrow-up-right-from-square go"></i></a>`).join("");
+
+    const navHtml = NAV.map((n) => `<a href="${n.href}" data-sec="${n.href.slice(1)}"><i class="${n.icon}"></i><span>${n.label}</span></a>`).join("");
+    document.querySelector(".nav-links").innerHTML = NAV.map((n) => `<a href="${n.href}" data-sec="${n.href.slice(1)}">${n.label}</a>`).join("");
+    document.getElementById("drawer").innerHTML = navHtml +
+      `<a href="https://recipepick.onrender.com" target="_blank" rel="noopener" style="margin-top:auto;background:var(--leaf-d);color:#fff"><i class="fa-solid fa-arrow-up-right-from-square" style="color:#fff"></i>서비스 바로가기</a>`;
+
+    /* ---------- 내비게이션 · 모바일 메뉴 ---------- */
+    const burger = document.getElementById("burger");
+    const setMenu = (open) => {
+      document.body.classList.toggle("menu-open", open);
+      burger.classList.toggle("open", open);
+      burger.setAttribute("aria-expanded", open);
+      burger.setAttribute("aria-label", open ? "메뉴 닫기" : "메뉴 열기");
+    };
+    burger.addEventListener("click", () => setMenu(!document.body.classList.contains("menu-open")));
+    document.getElementById("drawerBg").addEventListener("click", () => setMenu(false));
+    document.getElementById("drawer").addEventListener("click", (e) => e.target.closest("a") && setMenu(false));
+    addEventListener("keydown", (e) => e.key === "Escape" && setMenu(false));
+
+    const header = document.querySelector("header.site");
+    const progress = document.getElementById("progress");
+    const toTop = document.getElementById("toTop");
+    const onScroll = () => {
+      const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+      header.classList.toggle("scrolled", y > 8);
+      progress.style.width = `${h > 0 ? (y / h) * 100 : 0}%`;
+      toTop.classList.toggle("show", y > 600);
+    };
+    addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
+
+    const secObs = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      document.querySelectorAll("[data-sec]").forEach((a) => a.classList.toggle("active", a.dataset.sec === en.target.id));
+    }), { rootMargin: "-45% 0px -50% 0px" });
+    NAV.forEach((n) => { const s = document.querySelector(n.href); s && secObs.observe(s); });
+
+    /* ---------- 등장 애니메이션 · 숫자 카운트 ---------- */
+    const revealObs = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add("in"); revealObs.unobserve(en.target); }
+    }), { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((el) => revealObs.observe(el));
+
+    const countObs = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      const el = en.target, target = +el.dataset.count, prefix = el.querySelector("small")?.outerHTML || "";
+      const t0 = performance.now();
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / 1200);
+        el.innerHTML = prefix + Math.round(target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      countObs.unobserve(el);
+    }), { threshold: 0.5 });
+    document.querySelectorAll("[data-count]").forEach((el) => countObs.observe(el));
+
+    /* ---------- 히어로 미리보기: 동작 줄이기 설정이면 자동 재생하지 않음 ---------- */
+    if (heroVideo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      heroVideo.play().catch(() => {});
+    }
+  </script>
+</body>
+</html>
