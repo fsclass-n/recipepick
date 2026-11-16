@@ -10,6 +10,22 @@ AI 레시피 및 식단 추천: 냉장고 파먹기 컨셉. RPA로 대형마트 
 | Frontend Production (Render) | https://recipepick.onrender.com |
 | Backend API (Render) | https://recipepick-api.onrender.com (`/docs`) |
 
+## 발표·시연 영상 (10분)
+
+[![RecipePick 10분 발표·시연](docs/video/video-thumbnail.png)](https://github.com/fsclass-n/recipepick/releases/latest/download/recipepick_final.mp4)
+
+> 팀 구성 (1인 프로젝트): 홍기흥 (Full-stack Developer) · 실제 운영 사이트에서 일반 회원과 관리자 계정을 비교 시연 · 내레이션은 AI 합성 음성입니다.
+
+| 시간 | 내용 |
+| :--- | :--- |
+| 00:00 | PPT 발표 — 문제 정의 · 아키텍처 · 기술 선택 · RPA · Gemini · DevOps · 트러블슈팅 |
+| 03:00 | 운영 서비스 — 메인페이지 · 오늘의 할인 |
+| 03:30 | 일반 회원 — 대시보드 · 냉장고 하이라이트 · 장바구니 맵 · 마트 할인 · AI 레시피 생성 · 관리자 화면 차단(403) |
+| 06:30 | 관리자 — 크롤러 모니터링 · Plotly 차트 · 작업 로그 · **두 계정 좌우 비교(실시간 반영·자기 권한 잠금)** · API 문서 · CI |
+| 09:00 | 클로징 — 회고 · 다음 단계 · QR |
+
+대본·연출 가이드: [`docs/video/영상_대본_및_연출가이드.md`](docs/video/영상_대본_및_연출가이드.md) · 자막: [`docs/video/recipepick_final.srt`](docs/video/recipepick_final.srt)
+
 ## 디렉터리 구조
 
 ```text

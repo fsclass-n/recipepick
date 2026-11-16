@@ -1,0 +1,7 @@
+# 대용량 영상·중간 산출물은 저장소에 넣지 않습니다 (GitHub Release 업로드 권장)
+work/
+*.mp4
+*.webm
+*.wav
+*.mp3
+*.log

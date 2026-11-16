@@ -21,3 +21,8 @@
 ## Deploy
 - Push to `main` auto-deploys via platform Git integrations (no deploy hooks): Render (`render.yaml`, `autoDeployTrigger: commit`) and Netlify (`netlify.toml`).
 - GitHub Actions: `ci.yml` (tests/build/docker), `pages.yml` (pages/ → GitHub Pages; requires Pages source = GitHub Actions).
+
+## Video (docs/video)
+- Rebuild the 10-min presentation/demo video with `docs/video/tools/` (tts.py → export_slides.ps1 → record_demo.py → compose.py → check_final.py → gen_guide.py). Scene script/timing lives only in `tools/scenes.py`.
+- ffmpeg is auto-detected from the winget Gyan.FFmpeg install (or set `FFMPEG`). Large outputs (`*.mp4`, `work/`) are git-ignored; upload the final mp4 to a GitHub Release.
+- Demo recording runs against production and temporarily changes the test user's health type; the recorder restores it (`ensure_test_user`).
