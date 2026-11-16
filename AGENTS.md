@@ -27,3 +27,7 @@
 - Rebuild the 10-min presentation/demo video with `docs/video/tools/` (tts.py → export_slides.ps1 → record_demo.py → compose.py → check_final.py → gen_guide.py). Scene script/timing lives only in `tools/scenes.py`.
 - ffmpeg is auto-detected from the winget Gyan.FFmpeg install (or set `FFMPEG`). Large outputs (`*.mp4`, `work/`) are git-ignored; upload the final mp4 to a GitHub Release.
 - Demo recording runs against production and temporarily changes the test user's health type; the recorder restores it (`ensure_test_user`).
+
+## Docs (진행일지·산출물)
+- `python docs/tools/build_docs.py` regenerates the 5 journals (fills only empty cells of the original forms in `docs/tools/templates/`) and 5 deliverables, re-saves them via Hancom Hwp COM and exports PDFs to `docs/pdf/`. Content lives in `docs/tools/doc_content.py`.
+- Hwp COM gotchas: use PowerShell COM (`hwp_to_pdf.ps1`), export PDF before re-saving the open HWPX, export to an ASCII temp path. HTML import/InsertFile crashes Hwp here.
