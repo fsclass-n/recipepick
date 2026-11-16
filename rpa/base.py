@@ -177,6 +177,12 @@ class BaseMartCrawler:
             ),
             viewport={"width": 1366, "height": 900},
         )
+        context.route(
+            "**/*",
+            lambda route: route.abort()
+            if route.request.resource_type in {"media", "font"}
+            else route.continue_(),
+        )
         page = context.new_page()
         results: list[RawDeal] = []
         try:

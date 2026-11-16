@@ -145,6 +145,7 @@ class CrawlerService:
 
     async def _loop(self, run_on_start: bool) -> None:
         if run_on_start:
+            await asyncio.sleep(settings.crawl_startup_delay_seconds)
             await asyncio.to_thread(self.run_once, "startup")
         while True:
             self.next_run_at = datetime.now() + timedelta(minutes=self.interval_minutes)

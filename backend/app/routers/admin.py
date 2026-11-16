@@ -1,9 +1,5 @@
 import json
 
-import numpy as np
-import pandas as pd
-import plotly.express as px
-from plotly.utils import PlotlyJSONEncoder
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -59,6 +55,12 @@ def crawler_jobs(limit: int = 30, db: Session = Depends(get_db)):
 @router.get("/crawler/stats")
 def crawler_stats(db: Session = Depends(get_db)):
     """pandas 로 수집 데이터를 집계하고 Plotly figure JSON 을 반환한다."""
+    # 무료 인스턴스 메모리 절약을 위해 무거운 분석 라이브러리는 호출 시점에 로드한다.
+    import numpy as np
+    import pandas as pd
+    import plotly.express as px
+    from plotly.utils import PlotlyJSONEncoder
+
     deals = pd.read_sql(select(Deal.mart, Deal.category, Deal.discount_rate, Deal.original_price,
                                Deal.sale_price, Deal.is_closing_sale), db.bind)
     jobs = pd.read_sql(select(CrawlJob.id, CrawlJob.status, CrawlJob.items_collected, CrawlJob.started_at)

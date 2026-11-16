@@ -55,6 +55,7 @@ class Settings:
         self.rpa_mode = os.getenv("RPA_MODE", "auto").lower()
         self.crawl_interval_minutes = int(os.getenv("CRAWL_INTERVAL_MINUTES", "60"))
         self.crawl_on_startup = _bool("CRAWL_ON_STARTUP", True)
+        self.crawl_startup_delay_seconds = int(os.getenv("CRAWL_STARTUP_DELAY_SECONDS", "30"))
 
         self.telegram_bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
         self.telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID", "")

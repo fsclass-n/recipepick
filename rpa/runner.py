@@ -64,7 +64,10 @@ def run_all(
             from playwright.sync_api import sync_playwright
 
             pw = sync_playwright().start()
-            browser = pw.chromium.launch(headless=headless, args=["--no-sandbox", "--disable-dev-shm-usage"])
+            browser = pw.chromium.launch(
+                headless=headless,
+                args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-extensions", "--no-zygote"],
+            )
             for crawler in live_targets:
                 try:
                     deals = crawler.crawl_live(browser, timeout_ms, log, kws)
