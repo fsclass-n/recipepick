@@ -1,0 +1,33 @@
+# 로컬 통합 실행:  docker compose up --build
+#  - API:      http://localhost:8000  (Swagger: /docs)
+#  - Frontend: http://localhost:5173
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    environment:
+      PORT: 8000
+      BACKEND_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "8000:8000"
+    volumes:
+      - api-data:/app/backend/data
+    shm_size: "1gb"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  api-data:
