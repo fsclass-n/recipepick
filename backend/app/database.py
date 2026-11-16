@@ -10,9 +10,20 @@ from .config import BASE_DIR, get_settings
 settings = get_settings()
 
 
+def _ssl_args() -> dict:
+    """TiDB Cloud 는 TLS 필수: CA 검증 + 호스트명 확인."""
+    return {"ca": settings.tidb_ca_path or certifi.where(), "check_hostname": True}
+
+
 def _build_engine():
     if settings.database_url:
-        return create_engine(settings.database_url, pool_pre_ping=True)
+        is_mysql = settings.database_url.startswith("mysql")
+        return create_engine(
+            settings.database_url,
+            connect_args={"ssl": _ssl_args()} if is_mysql else {},
+            pool_pre_ping=True,
+            pool_recycle=300 if is_mysql else -1,
+        )
     if settings.tidb_host:
         url = URL.create(
             "mysql+pymysql",
@@ -23,10 +34,9 @@ def _build_engine():
             database=settings.tidb_db_name,
             query={"charset": "utf8mb4"},
         )
-        ssl = {"ca": settings.tidb_ca_path or certifi.where(), "check_hostname": True}
         return create_engine(
             url,
-            connect_args={"ssl": ssl},
+            connect_args={"ssl": _ssl_args()},
             pool_pre_ping=True,
             pool_recycle=300,
             pool_size=5,

@@ -14,7 +14,7 @@ export default function OAuthCallback() {
     window.history.replaceState(null, "", window.location.pathname);
     if (!token) return navigate("/login?error=oauth_failed", { replace: true });
     loginWithToken(token)
-      .then(() => navigate("/", { replace: true }))
+      .then(() => navigate("/dashboard", { replace: true }))
       .catch(() => navigate("/login?error=oauth_failed", { replace: true }));
   }, [loginWithToken, navigate]);
 

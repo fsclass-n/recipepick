@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
-import Logo from "../components/Logo";
+import Footer from "../components/Footer";
+import PublicHeader from "../components/PublicHeader";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
-import { useTheme } from "../context/ThemeContext";
 import { api, HEALTH_LABELS, oauthLoginUrl, PASSWORD_RULE, passwordChecks, won } from "../lib/api";
 
 const TEST_ACCOUNTS = {
@@ -62,8 +62,7 @@ function HeroPanel() {
         <i key={f.icon} className={`fa-solid ${f.icon} absolute animate-float text-4xl opacity-70 ${f.cls}`} style={{ animationDelay: f.delay }} />
       ))}
 
-      <Logo light size="text-3xl" />
-      <div className="relative mt-auto mb-auto max-w-lg animate-fade-up">
+      <div className="relative my-auto max-w-lg animate-fade-up">
         <p className="chip bg-white/15 text-leaf-50"><span className="size-1.5 animate-pulse rounded-full bg-tomato-400" />실시간 마트 할인 수집 중</p>
         <h1 className="mt-4 text-4xl leading-tight lg:text-5xl">
           냉장고 속 재료와<br />오늘의 <span className="text-tomato-400">마감세일</span>로<br />건강한 한끼를.
@@ -91,7 +90,7 @@ function HeroPanel() {
 
         {stats?.top_deals?.length > 0 && (
           <ul className="mt-5 space-y-2">
-            {stats.top_deals.map((d) => (
+            {stats.top_deals.slice(0, 3).map((d) => (
               <li key={d.name + d.mart} className="flex items-center justify-between rounded-xl bg-black/15 px-4 py-2 text-sm">
                 <span className="truncate"><i className="fa-solid fa-fire mr-2 text-tomato-400" />{d.name} <span className="text-leaf-200">· {d.mart}</span></span>
                 <span className="shrink-0 font-bold text-tomato-300">-{d.discount_rate}%</span>
@@ -100,7 +99,6 @@ function HeroPanel() {
           </ul>
         )}
       </div>
-      <p className="relative text-xs text-leaf-200/80">© 2026 RecipePick · RPA × Gemini AI 푸드테크 짠테크 플랫폼</p>
     </section>
   );
 }
@@ -108,11 +106,10 @@ function HeroPanel() {
 export default function Login() {
   const { user, login, register } = useAuth();
   const { toast } = useRealtime();
-  const { dark, toggle } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(params.get("mode") === "register" ? "register" : "login");
   const [form, setForm] = useState({ email: "", password: "", name: "", health_type: "general" });
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(null);
@@ -123,7 +120,12 @@ export default function Login() {
     api("/api/auth/providers").then(setProviders).catch(() => {});
   }, []);
 
-  if (user && !busy) return <Navigate to={location.state?.from || "/"} replace />;
+  useEffect(() => {
+    setMode(params.get("mode") === "register" ? "register" : "login");
+    setError("");
+  }, [params]);
+
+  if (user && !busy) return <Navigate to={location.state?.from || "/dashboard"} replace />;
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const checks = passwordChecks(form.password);
@@ -138,7 +140,7 @@ export default function Login() {
     try {
       const u = mode === "register" && !creds ? await register(form) : await login(email, password);
       toast({ title: `${u.name}님, 환영합니다!`, message: u.role === "admin" ? "관리자 권한으로 로그인했습니다." : "오늘의 할인 식재료를 확인해 보세요.", tone: "success", icon: "fa-leaf" });
-      navigate(u.role === "admin" && creds?.kind === "admin" ? "/admin" : location.state?.from || "/", { replace: true });
+      navigate(u.role === "admin" && creds?.kind === "admin" ? "/admin" : location.state?.from || "/dashboard", { replace: true });
     } catch (err) {
       setError(err.message);
       setBusy(null);
@@ -166,17 +168,12 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex min-h-dvh flex-col">
+      <PublicHeader />
+      <div className="flex flex-1">
       <HeroPanel />
       <section className="relative flex w-full flex-col md:w-1/2">
-        <div className="flex items-center justify-between p-5 md:justify-end">
-          <span className="md:hidden"><Logo /></span>
-          <button onClick={toggle} className="grid size-10 place-items-center rounded-xl hover:bg-leaf-50 dark:hover:bg-ink-line" aria-label="테마 전환">
-            <i className={`fa-solid ${dark ? "fa-sun text-amber-300" : "fa-moon text-slate-500"}`} />
-          </button>
-        </div>
-
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10">
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-10">
           <div className="mb-6 rounded-2xl bg-gradient-to-r from-leaf-600 to-leaf-700 p-4 text-white md:hidden">
             <p className="text-xs opacity-80">오늘의 마감세일로 냉장고 파먹기</p>
             <p className="font-display text-lg">AI가 건강 맞춤 레시피를 창작해 드려요 🥗</p>
@@ -271,6 +268,8 @@ export default function Login() {
           </p>
         </div>
       </section>
+      </div>
+      <Footer compact />
     </div>
   );
 }

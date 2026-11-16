@@ -76,7 +76,7 @@ def public_stats():
         row = db.execute(
             select(func.count(Deal.id), func.avg(Deal.discount_rate), func.sum(Deal.original_price - Deal.sale_price))
         ).one()
-        top = db.scalars(select(Deal).order_by(Deal.discount_rate.desc()).limit(3)).all()
+        top = db.scalars(select(Deal).order_by(Deal.discount_rate.desc()).limit(8)).all()
         return {
             "deals": row[0] or 0,
             "avg_discount": round(float(row[1] or 0), 1),
@@ -85,6 +85,11 @@ def public_stats():
             "users": db.scalar(select(func.count(User.id))) or 0,
             "recipes": db.scalar(select(func.count(Recipe.id))) or 0,
             "top_deals": [
-                {"name": d.name, "mart": d.mart, "sale_price": d.sale_price, "discount_rate": d.discount_rate} for d in top
+                {
+                    "name": d.name, "mart": d.mart, "category": d.category, "sale_price": d.sale_price,
+                    "original_price": d.original_price, "discount_rate": d.discount_rate,
+                    "is_closing_sale": d.is_closing_sale, "image_url": d.image_url, "source": d.source,
+                }
+                for d in top
             ],
         }

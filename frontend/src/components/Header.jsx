@@ -4,10 +4,11 @@ import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { useTheme } from "../context/ThemeContext";
 import { HEALTH_LABELS, timeAgo } from "../lib/api";
+import Hamburger from "./Hamburger";
 import Logo from "./Logo";
 
 const NAV = [
-  { to: "/", label: "대시보드", icon: "fa-house" },
+  { to: "/dashboard", label: "대시보드", icon: "fa-house" },
   { to: "/fridge", label: "냉장고 파먹기", icon: "fa-snowflake" },
   { to: "/deals", label: "마트 할인", icon: "fa-tags" },
   { to: "/recipe", label: "AI 레시피", icon: "fa-wand-magic-sparkles" },
@@ -97,10 +98,10 @@ export default function Header() {
     <>
       <header className={`sticky top-0 z-40 border-b transition-all ${scrolled ? "border-leaf-100 bg-white/85 shadow-sm backdrop-blur-lg dark:border-ink-line dark:bg-ink/85" : "border-transparent bg-cream/60 dark:bg-ink/60"}`}>
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
-          <Link to="/" className="shrink-0"><Logo /></Link>
+          <Link to="/dashboard" className="shrink-0" aria-label="대시보드"><Logo /></Link>
           <nav className="ml-6 hidden flex-1 items-center gap-1 lg:flex">
             {items.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.to === "/"} className={linkCls}>
+              <NavLink key={n.to} to={n.to} end={n.to === "/dashboard"} className={linkCls}>
                 <i className={`fa-solid ${n.icon} text-xs`} />{n.label}
               </NavLink>
             ))}
@@ -121,11 +122,7 @@ export default function Header() {
               aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
               aria-expanded={open}
             >
-              <span className="relative block h-4 w-5">
-                <span className={`absolute left-0 h-0.5 w-5 rounded bg-current transition-all duration-300 ${open ? "top-1.5 rotate-45" : "top-0"}`} />
-                <span className={`absolute top-1.5 left-0 h-0.5 w-5 rounded bg-current transition-all duration-200 ${open ? "translate-x-3 opacity-0" : ""}`} />
-                <span className={`absolute left-0 h-0.5 w-5 rounded bg-current transition-all duration-300 ${open ? "top-1.5 -rotate-45" : "top-3"}`} />
-              </span>
+              <Hamburger open={open} />
             </button>
           </div>
         </div>
@@ -157,7 +154,7 @@ export default function Header() {
             <NavLink
               key={n.to}
               to={n.to}
-              end={n.to === "/"}
+              end={n.to === "/dashboard"}
               className={({ isActive }) => `${linkCls({ isActive })} py-3 text-base ${open ? "animate-fade-up" : ""}`}
               style={{ animationDelay: `${i * 40}ms` }}
             >

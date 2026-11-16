@@ -7,6 +7,8 @@ import { useAuth } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import Deals from "./pages/Deals";
 import Fridge from "./pages/Fridge";
+import Landing from "./pages/Landing";
+import Legal from "./pages/Legal";
 import Login from "./pages/Login";
 import OAuthCallback from "./pages/OAuthCallback";
 import Profile from "./pages/Profile";
@@ -27,7 +29,7 @@ function Protected({ admin = false }) {
   const location = useLocation();
   if (loading) return <FullSpinner />;
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  if (admin && !isAdmin) return <Navigate to="/" replace />;
+  if (admin && !isAdmin) return <Navigate to="/dashboard" replace />;
   return <Outlet />;
 }
 
@@ -50,11 +52,14 @@ export default function App() {
     <>
       <Toasts />
       <Routes>
+        <Route index element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/terms" element={<Legal type="terms" />} />
+        <Route path="/privacy" element={<Legal type="privacy" />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         <Route element={<Protected />}>
           <Route element={<Layout />}>
-            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="fridge" element={<Fridge />} />
             <Route path="deals" element={<Deals />} />
             <Route path="recipe" element={<Recipe />} />
