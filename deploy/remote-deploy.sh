@@ -3,6 +3,7 @@
 set -Eeuo pipefail
 : "${PROJECT_DIR:?missing PROJECT_DIR}"
 : "${RELEASE:?missing RELEASE}"
+PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
 release_dir="$PROJECT_DIR/releases/$RELEASE"
 current_link="$PROJECT_DIR/current"
 previous=$(readlink "$current_link" 2>/dev/null || true)
