@@ -40,6 +40,13 @@ startup (`Base.metadata.create_all`) and test accounts are seeded on a fresh
 schema. `/api/health` reports `tidb`, `mysql`, or `sqlite` from the resolved
 host.
 
+Failover: when `DATABASE_URL` and `TIDB_*` are both set, each new pooled
+connection tries the primary (3 s connect timeout) and falls back to TiDB on
+failure (`[db-failover]` log line). A stopped RDS therefore degrades to TiDB
+instead of 502s, and connections drift back to RDS automatically once it
+recovers (`pool_recycle=300`). Writes made during an outage land only on the
+fallback database — the two stores are not synchronized.
+
 ## Operations
 
 - DNS updater runs after boot and every five minutes; logs: `journalctl -u recipepick-duckdns.service`.
