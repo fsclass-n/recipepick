@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically check RecipePick DuckDNS record
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

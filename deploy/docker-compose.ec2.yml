@@ -1,0 +1,17 @@
+# Production override: containers stay private; host Nginx owns ports 80/443.
+services:
+  api:
+    ports: !override
+      - "127.0.0.1:8000:8000"
+    env_file: !override
+      - ${RECIPEPICK_ENV_FILE:-/etc/recipepick/recipepick.env}
+    environment:
+      PORT: 8000
+      BACKEND_URL: https://recipepick.duckdns.org
+      FRONTEND_URL: https://recipepick.duckdns.org
+  web:
+    build:
+      args:
+        VITE_API_BASE_URL: /
+    ports: !override
+      - "127.0.0.1:5173:80"

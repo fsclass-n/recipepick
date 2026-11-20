@@ -1,7 +1,9 @@
 // 배포 플랫폼에 VITE_API_BASE_URL 이 없으면 프로덕션 빌드는 Render API 를 기본값으로 사용한다.
 const DEFAULT_API = import.meta.env.PROD ? "https://recipepick-api.onrender.com" : "http://localhost:8000";
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API).replace(/\/$/, "");
-export const WS_URL = API_BASE.replace(/^http/, "ws") + "/ws";
+export const WS_URL = API_BASE
+  ? API_BASE.replace(/^http/, "ws") + "/ws"
+  : `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
 
 const TOKEN_KEY = "rp-token";
 

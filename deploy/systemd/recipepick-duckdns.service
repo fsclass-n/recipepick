@@ -1,0 +1,8 @@
+[Unit]
+Description=Update RecipePick DuckDNS record
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/recipepick-duckdns-update
