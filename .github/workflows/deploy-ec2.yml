@@ -37,7 +37,7 @@ jobs:
           RELEASE: ${{ github.sha }}
         run: |
           ssh -i ~/.ssh/recipepick_ec2 -p "$EC2_PORT" "$EC2_USER@$EC2_HOST" \
-            "mkdir -p '$EC2_PROJECT_PATH/releases/$RELEASE'"
+            "echo \"deploy target: \$(hostname) user=\$(whoami)\"; mkdir -p '$EC2_PROJECT_PATH/releases/$RELEASE'"
           rsync -az --delete \
             --exclude '.git/' --exclude '.env' --exclude 'key/' --exclude 'backend/data/' \
             -e "ssh -i ~/.ssh/recipepick_ec2 -p $EC2_PORT" \
