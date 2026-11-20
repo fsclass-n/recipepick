@@ -66,6 +66,7 @@ def get_db():
 
 
 def db_backend_name() -> str:
-    if engine.dialect.name == "mysql" and settings.tidb_host and not settings.database_url:
-        return "tidb"
+    if engine.dialect.name == "mysql":
+        host = settings.tidb_host or (engine.url.host or "")
+        return "tidb" if "tidbcloud" in host else "mysql"
     return engine.dialect.name
