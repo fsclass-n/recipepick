@@ -41,6 +41,8 @@ class Settings:
         self.tidb_db_name = os.getenv("TIDB_DB_NAME", "recipepick")
         self.tidb_ca_path = os.getenv("TIDB_CA_PATH", "").strip()
         self.database_url = os.getenv("DATABASE_URL", "").strip()
+        # required(기본): TiDB Cloud 필수 정책과 동일하게 TLS 검증. disabled: RDS 프라이빗 연결 등.
+        self.db_ssl_mode = os.getenv("DB_SSL_MODE", "required").strip().lower()
         self.seed_test_accounts = _bool("SEED_TEST_ACCOUNTS", True)
 
         self.gemini_api_key = os.getenv("GEMINI_API_KEY", "").strip()

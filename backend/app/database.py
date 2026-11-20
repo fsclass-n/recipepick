@@ -18,9 +18,10 @@ def _ssl_args() -> dict:
 def _build_engine():
     if settings.database_url:
         is_mysql = settings.database_url.startswith("mysql")
+        use_ssl = is_mysql and settings.db_ssl_mode != "disabled"
         return create_engine(
             settings.database_url,
-            connect_args={"ssl": _ssl_args()} if is_mysql else {},
+            connect_args={"ssl": _ssl_args()} if use_ssl else {},
             pool_pre_ping=True,
             pool_recycle=300 if is_mysql else -1,
         )
@@ -65,4 +66,6 @@ def get_db():
 
 
 def db_backend_name() -> str:
-    return "tidb" if engine.dialect.name == "mysql" else engine.dialect.name
+    if engine.dialect.name == "mysql" and settings.tidb_host and not settings.database_url:
+        return "tidb"
+    return engine.dialect.name
