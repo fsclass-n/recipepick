@@ -11,9 +11,11 @@ __pycache__/
 !.env.example
 
 # Local data
+*.pem
 *.db
 *.sqlite3
 backend/data/
+key/
 
 # Node
 node_modules/
@@ -25,5 +27,3 @@ frontend/dist/
 Thumbs.db
 .vscode/
 .idea/
-
-key/
