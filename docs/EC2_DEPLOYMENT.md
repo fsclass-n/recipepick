@@ -29,6 +29,17 @@ Create these **Actions environment secrets** in `production`: `EC2_HOST`,
 `deploy/remote-deploy.sh`. It waits for `/api/health`; failure restores the prior
 release. The server does not need a GitHub deploy key.
 
+## Database
+
+EC2 uses AWS RDS via `DATABASE_URL` in `/etc/recipepick/recipepick.env`
+(`mysql+pymysql://...`), which takes precedence over `TIDB_*`. Because RDS
+serves an Amazon CA that certifi does not carry, `DB_SSL_MODE=disabled` is set
+for the private VPC link; the default `required` keeps TiDB's TLS verification
+everywhere else (Render is unaffected). Tables are created automatically at
+startup (`Base.metadata.create_all`) and test accounts are seeded on a fresh
+schema. `/api/health` reports `tidb`, `mysql`, or `sqlite` from the resolved
+host.
+
 ## Operations
 
 - DNS updater runs after boot and every five minutes; logs: `journalctl -u recipepick-duckdns.service`.
