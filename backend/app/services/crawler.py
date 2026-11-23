@@ -12,6 +12,7 @@ from ..database import SessionLocal
 from ..models import CrawlJob, Deal, FridgeItem, utcnow
 from .matcher import find_matches, notify_match
 from .notifier import manager, send_webhooks
+from .storage import mirror_image_to_s3
 
 log = logging.getLogger("recipepick.crawler")
 settings = get_settings()
@@ -77,6 +78,8 @@ class CrawlerService:
             marts = {d.mart for d in raw}
             if marts:
                 db.execute(delete(Deal).where(Deal.mart.in_(marts)))
+            # 외부 핫링크 이미지를 S3로 미러링 (S3_BUCKET 미설정/실패 시 원본 유지)
+            mirrored = {u: mirror_image_to_s3(u) for u in {d.image_url for d in raw if d.image_url}}
             new_deals = [
                 Deal(
                     job_id=job.id,
@@ -89,7 +92,7 @@ class CrawlerService:
                     unit=d.unit,
                     store=d.store,
                     url=d.url,
-                    image_url=d.image_url,
+                    image_url=mirrored.get(d.image_url, d.image_url),
                     is_closing_sale=d.is_closing_sale,
                     source=d.source,
                     valid_until=d.valid_until,

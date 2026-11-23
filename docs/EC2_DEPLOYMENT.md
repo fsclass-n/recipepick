@@ -47,6 +47,19 @@ instead of 502s, and connections drift back to RDS automatically once it
 recovers (`pool_recycle=300`). Writes made during an outage land only on the
 fallback database — the two stores are not synchronized.
 
+## Deal images (S3 mirror)
+
+Crawled `image_url`s hotlink the mart sites and can break. When `S3_BUCKET`
+is set in `recipepick.env`, the crawler downloads each image and uploads it to
+`s3://<bucket>/<S3_PREFIX>/<sha256(url)[:20]>.<ext>`, storing the resulting
+`https://<bucket>.s3.<region>.amazonaws.com/...` URL instead. Missing bucket,
+non-image responses, and upload errors all fall back to the original URL.
+
+Credentials come from the EC2 instance's IAM role (boto3 default chain) — no
+keys are stored anywhere. The bucket only needs public read on `<prefix>/*`
+for `<img>` tags; the role needs `s3:PutObject`/`s3:GetObject`/`s3:DeleteObject`
+on `arn:aws:s3:::<bucket>/<prefix>/*`.
+
 ## Operations
 
 - DNS updater runs after boot and every five minutes; logs: `journalctl -u recipepick-duckdns.service`.

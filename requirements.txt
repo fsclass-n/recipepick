@@ -20,6 +20,9 @@ playwright==1.64.1
 beautifulsoup4==4.15.0
 requests==2.34.2
 
+# AWS (S3 이미지 미러링 — EC2 인스턴스 IAM Role 사용)
+boto3==1.44.4
+
 # Data analysis / Visualization
 numpy==2.4.6
 pandas==3.1.1

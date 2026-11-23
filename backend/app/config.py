@@ -56,6 +56,11 @@ class Settings:
             "kakao": (os.getenv("KAKAO_CLIENT_ID", ""), os.getenv("KAKAO_CLIENT_SECRET", "")),
         }
 
+        # S3 이미지 미러링 (비어 있으면 비활성 → 원본 URL 유지)
+        self.s3_bucket = os.getenv("S3_BUCKET", "").strip()
+        self.s3_region = os.getenv("S3_REGION", "ap-northeast-2").strip()
+        self.s3_prefix = os.getenv("S3_PREFIX", "deals").strip().strip("/")
+
         self.rpa_mode = os.getenv("RPA_MODE", "auto").lower()
         self.crawl_interval_minutes = int(os.getenv("CRAWL_INTERVAL_MINUTES", "60"))
         self.crawl_on_startup = _bool("CRAWL_ON_STARTUP", True)
