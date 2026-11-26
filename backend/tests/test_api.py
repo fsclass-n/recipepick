@@ -103,3 +103,15 @@ def test_test_admin_is_read_only(client):
         assert resp.status_code == 403, resp.text
         assert "읽기 전용" in resp.json()["detail"]
     assert client.get("/api/admin/users", headers=h).json()[0]["name"] != "hacked"
+
+
+def test_failover_connection_reports_matched_rows(monkeypatch):
+    """페일오버 풀의 raw pymysql 연결도 FOUND_ROWS 를 켜야 값이 같은 UPDATE 가 StaleDataError 를 내지 않는다."""
+    import pymysql.constants
+
+    from app import database
+
+    captured = {}
+    monkeypatch.setattr(database.pymysql, "connect", lambda **kw: captured.update(kw))
+    database._pymysql_connect(host="h", port=3306, user="u", password="p", database="d")
+    assert captured["client_flag"] & pymysql.constants.CLIENT.FOUND_ROWS

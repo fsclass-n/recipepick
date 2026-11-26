@@ -3,6 +3,7 @@ from urllib.parse import unquote_plus
 
 import certifi
 import pymysql
+import pymysql.constants
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -18,9 +19,12 @@ def _ssl_args() -> dict:
 
 
 def _pymysql_connect(*, host, port, user, password, database, ssl=None, connect_timeout=10):
+    # FOUND_ROWS: SQLAlchemy 기본 다이얼렉트와 동일하게 "변경된 행"이 아닌 "일치한 행" 수를 받아야
+    # 값이 그대로인 UPDATE 에서 StaleDataError 가 나지 않는다.
     kwargs = dict(
         host=host, port=port, user=user, password=password,
         database=database, charset="utf8mb4", connect_timeout=connect_timeout,
+        client_flag=pymysql.constants.CLIENT.FOUND_ROWS,
     )
     if ssl:
         kwargs["ssl"] = ssl
