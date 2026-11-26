@@ -145,6 +145,30 @@ def test_admin_password_login_has_no_admin_rights(client):
     assert client.get("/api/fridge", headers=h).status_code == 200
 
 
+def test_oauth_login_grants_admin_rights_to_promoted_admin(client, admin_headers, monkeypatch):
+    """승격된 관리자 계정이 소셜 로그인하면 실제 관리자 권한(adm)을 받는다."""
+    from app.routers import auth as auth_router
+    from app.security import create_token, decode_token
+
+    monkeypatch.setattr(auth_router, "_fetch_profile", lambda provider, code, state: ("g-uid-1", "promoted@example.com", "승격회원"))
+
+    def callback_token():
+        state = create_token({"typ": "oauth_state", "p": "google", "r": "", "n": "x"}, minutes=10)
+        r = client.get(f"/api/auth/oauth/google/callback?code=fake&state={state}", follow_redirects=False)
+        assert r.status_code in (302, 307), r.text
+        return r.headers["location"].split("token=")[1]
+
+    claims = decode_token(callback_token())
+    assert not claims.get("adm") and not claims.get("ro")
+
+    uid = next(u for u in client.get("/api/admin/users?q=promoted", headers=admin_headers).json()
+               if u["email"] == "promoted@example.com")["id"]
+    assert client.patch(f"/api/admin/users/{uid}", headers=admin_headers, json={"role": "admin"}).status_code == 200
+    token = callback_token()
+    assert decode_token(token).get("adm") is True
+    assert client.get("/api/admin/overview", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+
+
 def _register(client, email):
     r = client.post("/api/auth/register", json={"email": email, "password": "Bye!2026a", "name": "탈퇴테스트"})
     assert r.status_code == 201, r.text

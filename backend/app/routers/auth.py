@@ -237,5 +237,7 @@ def oauth_callback(
             db.flush()
     if not user.is_active:
         return RedirectResponse(f"{frontend}/login?error=inactive")
-    token = _token_response(user, db).access_token
+    # 소셜 로그인은 제공사가 신원을 검증하므로, 승격된 관리자 계정에는 실제 관리자 권한(adm)을 준다.
+    # (비밀번호 로그인은 데모 관리자 비밀번호가 공개돼 있어 관리자 키 경로를 유지한다.)
+    token = _token_response(user, db, admin=user.role == "admin").access_token
     return RedirectResponse(f"{frontend}/oauth/callback#token={token}")

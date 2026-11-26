@@ -51,7 +51,7 @@ def decode_token(token: str) -> dict:
 
 
 def create_access_token(user: User, read_only: bool = False, admin: bool = False) -> str:
-    """ro: 테스트 관리자(조회 전용), adm: 관리자 키로 진입한 실제 관리자. 둘 다 없으면 일반 회원 세션."""
+    """ro: 테스트 관리자(조회 전용), adm: 실제 관리자(관리자 키 또는 승격 관리자의 소셜 로그인). 둘 다 없으면 일반 회원 세션."""
     data = {"sub": str(user.id), "role": user.role}
     if read_only:
         data["ro"] = True
@@ -61,7 +61,7 @@ def create_access_token(user: User, read_only: bool = False, admin: bool = False
 
 
 def has_admin_session(user: User, claims: dict) -> bool:
-    """관리자 화면 접근: 관리자 계정이면서 관리자 키(adm) 또는 테스트 관리자(ro) 로그인으로 들어온 경우만."""
+    """관리자 화면 접근: 관리자 계정이면서 실제 관리자(adm: 관리자 키 또는 승격 관리자의 소셜 로그인) 또는 테스트 관리자(ro)로 들어온 경우만."""
     return user.role == "admin" and bool(claims.get("adm") or claims.get("ro"))
 
 
@@ -101,5 +101,5 @@ def require_admin(request: Request, user: User = Depends(get_current_user)) -> U
     if user.role != "admin":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "관리자 권한이 필요합니다.")
     if not has_admin_session(user, getattr(request.state, "token_claims", {})):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "관리자 화면은 '실제 관리자(관리자 키)' 또는 '테스트 관리자'로 로그인해야 합니다.")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "관리자 화면은 '실제 관리자(관리자 키 또는 승격 관리자의 소셜 로그인)' 또는 '테스트 관리자'로 로그인해야 합니다.")
     return user
