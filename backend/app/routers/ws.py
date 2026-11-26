@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from ..database import SessionLocal
-from ..security import user_from_token
+from ..security import decode_token, has_admin_session, user_from_token
 from ..services.crawler import crawler_service
 from ..services.notifier import manager
 
@@ -15,7 +15,7 @@ async def websocket_endpoint(ws: WebSocket, token: str = ""):
     if not user:
         await ws.close(code=4401)
         return
-    is_admin = user.role == "admin"
+    is_admin = has_admin_session(user, decode_token(token))
     await manager.connect(user.id, ws, is_admin)
     await ws.send_json({"type": "hello", "data": {"user_id": user.id, "role": user.role}})
     if is_admin:

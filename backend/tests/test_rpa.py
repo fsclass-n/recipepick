@@ -36,4 +36,18 @@ def test_helpers():
 def test_demo_mode_all_marts():
     result = run_all(mode="demo", log=lambda m: None)
     assert set(result["sources"].values()) == {"demo"}
-    assert len(result["sources"]) == 3 and result["deals"]
+    assert set(result["sources"]) == {"이마트", "롯데마트", "홈플러스", "오이마켓"} and result["deals"]
+
+
+def test_demo_catalog_images_exist():
+    """데모 상품은 모두 관련 이미지(프런트엔드 public/demo 자체 호스팅)를 가진다."""
+    from pathlib import Path
+
+    from rpa.base import DEMO_CATALOG, DEMO_IMAGES
+
+    public = Path(__file__).resolve().parents[2] / "frontend" / "public"
+    for name, _, _ in DEMO_CATALOG:
+        assert DEMO_IMAGES.get(name, "").startswith("/demo/"), name
+        assert (public / DEMO_IMAGES[name].lstrip("/")).is_file(), name
+    deals = run_all(mode="demo", log=lambda m: None)["deals"]
+    assert all(d.image_url.startswith("/demo/") for d in deals)

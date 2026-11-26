@@ -8,7 +8,7 @@ import logging
 import re
 
 from ..config import get_settings
-from ..schemas import HEALTH_TYPES
+from ..schemas import CHEF_STYLES, HEALTH_TYPES
 
 log = logging.getLogger("recipepick.gemini")
 settings = get_settings()
@@ -71,9 +71,16 @@ RECIPE_SCHEMA = {
 
 
 def _build_prompt(
-    fridge: list[str], deals: list[dict], health_type: str, servings: int, max_minutes: int, notes: str, daily_kcal: int
+    fridge: list[str], deals: list[dict], health_type: str, servings: int, max_minutes: int, notes: str, daily_kcal: int,
+    style: str = "",
 ) -> str:
     health = HEALTH_TYPES.get(health_type, HEALTH_TYPES["general"])
+    chef = CHEF_STYLES.get(style)
+    style_line = (
+        f"\n[요리 스타일] {chef['chef']} 셰프 스타일({chef['label']}) — {chef['guide']}. "
+        "해당 셰프의 실제 레시피를 인용하지 말고 스타일만 참고하며, 건강 기준이 스타일보다 항상 우선합니다.\n"
+        if chef else ""
+    )
     deal_lines = "\n".join(
         f"- {d['name']} ({d['mart']}): {d['sale_price']:,}원 ({d['discount_rate']}% 할인, "
         f"{d['unit'] or d['category']}{' 마감세일' if d.get('is_closing_sale') else ''})"
@@ -83,7 +90,7 @@ def _build_prompt(
     return f"""당신은 임상영양사이자 요리 전문가입니다. 아래 조건으로 한국 가정식 레시피 1개를 창작하세요.
 
 [사용자 건강 상태] {health['label']} — {health['guide']} (1일 목표 {daily_kcal}kcal)
-
+{style_line}
 [냉장고 보유 재료]
 {fridge_lines}
 
@@ -187,6 +194,19 @@ def _fallback_recipe(
     }
 
 
+def _styled(data: dict, style: str) -> dict:
+    """규칙 기반 레시피에도 선택한 셰프 스타일을 제목·팁으로 반영한다."""
+    chef = CHEF_STYLES.get(style)
+    if not chef:
+        return {**data, "style": ""}
+    return {
+        **data,
+        "style": style,
+        "title": f"[{chef['chef']} 스타일] {data['title']}",
+        "health_tips": [f"{chef['label']} 포인트: {chef['guide'].split('.')[0]}.", *data["health_tips"]],
+    }
+
+
 def create_recipe(
     fridge: list[str],
     deals: list[dict],
@@ -195,20 +215,22 @@ def create_recipe(
     max_minutes: int = 30,
     notes: str = "",
     daily_kcal: int = 2000,
+    style: str = "",
 ) -> tuple[dict, str]:
     """return: (recipe_dict, source) — source 는 'gemini' 또는 'fallback'"""
     if not settings.gemini_api_key:
         log.info("GEMINI_API_KEY 미설정 → fallback 레시피 사용")
-        data = _fallback_recipe(fridge, deals, health_type, servings, max_minutes)
+        data = _styled(_fallback_recipe(fridge, deals, health_type, servings, max_minutes), style)
         return {**data, "fallback_reason": "no_api_key"}, "fallback"
-    prompt = _build_prompt(fridge, deals, health_type, servings, max_minutes, notes, daily_kcal)
+    prompt = _build_prompt(fridge, deals, health_type, servings, max_minutes, notes, daily_kcal, style)
     for model in _model_chain():
         try:
             data = _call_gemini(prompt, model)
             data.setdefault("servings", servings)
             data["model"] = model
+            data["style"] = style
             return data, "gemini"
         except Exception as e:
             log.warning("Gemini(%s) 호출 실패 → 다음 모델 시도: %s", model, str(e)[:200])
-    data = _fallback_recipe(fridge, deals, health_type, servings, max_minutes)
+    data = _styled(_fallback_recipe(fridge, deals, health_type, servings, max_minutes), style)
     return {**data, "fallback_reason": "ai_error"}, "fallback"

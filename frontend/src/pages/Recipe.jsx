@@ -5,6 +5,7 @@ import { useRealtime } from "../context/RealtimeContext";
 import { api, HEALTH_LABELS, timeAgo, won } from "../lib/api";
 import PageHero from "../components/PageHero";
 import { IMG } from "../lib/images";
+import { CHEF_STYLES, chefStyle } from "../lib/chefs";
 
 const LOADING_STEPS = [
   { icon: "fa-snowflake", text: "냉장고 재료를 확인하는 중..." },
@@ -59,6 +60,7 @@ function RecipeCard({ recipe }) {
         <i className="fa-solid fa-utensils absolute right-5 bottom-3 text-7xl text-white/10" />
         <div className="flex flex-wrap gap-1.5">
           <span className="chip bg-white/20"><i className={`fa-solid ${health.icon}`} />{health.label}</span>
+          {d.style && <span className="chip bg-tomato-500/80"><i className={`fa-solid ${chefStyle(d.style)?.icon}`} />{chefStyle(d.style)?.chef} 스타일</span>}
           <span className={`chip ${recipe.source === "gemini" ? "bg-sky-400/30" : "bg-amber-400/30"}`}>
             <i className={`fa-solid ${recipe.source === "gemini" ? "fa-wand-magic-sparkles" : "fa-book"}`} />{recipe.source === "gemini" ? `Gemini AI 창작${d.model ? ` · ${d.model}` : ""}` : d.fallback_reason === "no_api_key" ? "기본 템플릿 (API 키 미설정)" : "기본 템플릿 (AI 응답 지연·실패)"}
           </span>
@@ -150,7 +152,7 @@ export default function Recipe() {
   const [history, setHistory] = useState([]);
   const [selFridge, setSelFridge] = useState(null);
   const [selDeals, setSelDeals] = useState(() => (params.get("deal") ? [Number(params.get("deal"))] : []));
-  const [opts, setOpts] = useState({ health_type: user.health_type, servings: 2, max_minutes: 30, notes: "", extra: "", use_top_deals: true });
+  const [opts, setOpts] = useState({ health_type: user.health_type, style: "", servings: 2, max_minutes: 30, notes: "", extra: "", use_top_deals: true });
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [recipe, setRecipe] = useState(null);
@@ -197,6 +199,7 @@ export default function Recipe() {
           servings: Number(opts.servings),
           max_minutes: Number(opts.max_minutes),
           notes: opts.notes,
+          style: opts.style,
         },
       });
       setRecipe(r);
@@ -227,6 +230,25 @@ export default function Recipe() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <section className="card space-y-5 p-5 lg:col-span-2">
+          <div>
+            <div className="flex items-baseline justify-between gap-2">
+              <label className="label">셰프 스타일</label>
+              <span className="text-[11px] text-stone-400">셰프의 요리 철학에서 영감을 받은 스타일 · 공식 레시피 아님</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {CHEF_STYLES.map((c) => (
+                <button key={c.key || "default"} onClick={() => setOpts({ ...opts, style: c.key })} aria-pressed={opts.style === c.key}
+                  className={`group flex items-start gap-3 rounded-2xl border p-3 text-left transition ${opts.style === c.key ? "border-tomato-500 bg-tomato-50 ring-2 ring-tomato-500/15 dark:bg-tomato-500/10" : "border-stone-200 hover:border-stone-400 dark:border-ink-line"}`}>
+                  <span className={`grid size-9 shrink-0 place-items-center rounded-full ${opts.style === c.key ? "bg-tomato-500 text-white" : "bg-paper text-stone-500 dark:bg-ink"}`}><i className={`fa-solid ${c.icon} text-sm`} /></span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold">{c.chef} <span className="font-normal text-stone-400">· {c.label}</span></span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-stone-500">{c.desc}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div>
             <label className="label">건강 관리 목표</label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">

@@ -115,3 +115,91 @@ def test_failover_connection_reports_matched_rows(monkeypatch):
     monkeypatch.setattr(database.pymysql, "connect", lambda **kw: captured.update(kw))
     database._pymysql_connect(host="h", port=3306, user="u", password="p", database="d")
     assert captured["client_flag"] & pymysql.constants.CLIENT.FOUND_ROWS
+
+
+def test_failback_only_recycles_fallback_connections(monkeypatch):
+    """RDS 가 다시 열리면 TiDB(예비) 커넥션만 폐기 대상이 되고, 주 DB 커넥션은 그대로 둔다."""
+    from types import SimpleNamespace
+
+    from app import database
+
+    monkeypatch.setattr(database, "_primary_reachable", lambda host, port: True)
+    assert database.should_failback(SimpleNamespace(_rp_fallback=True), "rds", 3306)
+    assert not database.should_failback(SimpleNamespace(_rp_fallback=False), "rds", 3306)
+    monkeypatch.setattr(database, "_primary_reachable", lambda host, port: False)
+    assert not database.should_failback(SimpleNamespace(_rp_fallback=True), "rds", 3306)
+
+
+def test_db_status_reports_actual_backend(client, admin_headers):
+    body = client.get("/api/admin/overview", headers=admin_headers).json()
+    assert body["database"] == "sqlite" and body["database_failover"] is False
+
+
+
+def test_admin_password_login_has_no_admin_rights(client):
+    """로그인 유형 분리: 관리자 계정이라도 일반(비밀번호) 로그인으로는 관리자 API 에 접근할 수 없다."""
+    r = client.post("/api/auth/login", json={"email": "admin@recipepick.dev", "password": "Admin!2026"})
+    assert r.status_code == 200
+    h = {"Authorization": f"Bearer {r.json()['access_token']}"}
+    assert client.get("/api/admin/users", headers=h).status_code == 403
+    assert client.get("/api/fridge", headers=h).status_code == 200
+
+
+def _register(client, email):
+    r = client.post("/api/auth/register", json={"email": email, "password": "Bye!2026a", "name": "탈퇴테스트"})
+    assert r.status_code == 201, r.text
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+
+def test_withdraw(client, user_headers):
+    h = _register(client, "bye@b.com")
+    client.post("/api/fridge", headers=h, json={"name": "양파", "category": "채소", "quantity": 1, "unit": "개"})
+    assert client.request("DELETE", "/api/auth/me", headers=h, json={"password": "wrong"}).status_code == 401
+    assert client.request("DELETE", "/api/auth/me", headers=h, json={"password": "Bye!2026a"}).status_code == 204
+    assert client.get("/api/auth/me", headers=h).status_code == 401
+    assert client.post("/api/auth/login", json={"email": "bye@b.com", "password": "Bye!2026a"}).status_code == 401
+    # 데모 테스트 계정은 보호
+    r = client.request("DELETE", "/api/auth/me", headers=user_headers, json={"password": "Recipe!2026"})
+    assert r.status_code == 400
+
+
+def test_admin_kick(client, admin_headers):
+    victim = _register(client, "kick@b.com")
+    users = client.get("/api/admin/users", headers=admin_headers).json()
+    target = next(u for u in users if u["email"] == "kick@b.com")
+    me = next(u for u in users if u["email"] == "admin@recipepick.dev")
+    ro = {"Authorization": f"Bearer {client.post('/api/auth/test-admin').json()['access_token']}"}
+    assert client.delete(f"/api/admin/users/{target['id']}", headers=ro).status_code == 403
+    assert client.delete(f"/api/admin/users/{me['id']}", headers=admin_headers).status_code == 400
+    assert client.delete(f"/api/admin/users/{target['id']}", headers=admin_headers).status_code == 204
+    assert client.get("/api/auth/me", headers=victim).status_code == 401
+    assert client.delete(f"/api/admin/users/{target['id']}", headers=admin_headers).status_code == 404
+
+
+def test_fridge_scan(client, user_headers, monkeypatch):
+    import base64
+
+    from app.services import vision
+
+    img = "data:image/png;base64," + base64.b64encode(b"\x89PNG fake-bytes").decode()
+    # GEMINI_API_KEY 미설정 → 503
+    assert client.post("/api/fridge/scan", headers=user_headers, json={"image": img, "mime": "image/png"}).status_code == 503
+    assert client.post("/api/fridge/scan", headers=user_headers, json={"image": img, "mime": "image/gif"}).status_code == 415
+    monkeypatch.setattr(vision.settings, "gemini_api_key", "test")
+    monkeypatch.setattr(vision, "_call_vision", lambda image, mime, model: {"items": [
+        {"name": "계란", "category": "유제품·계란", "quantity": 6, "unit": "개", "confidence": 0.9},
+        {"name": "계란", "category": "유제품·계란", "quantity": 1, "unit": "개"},
+        {"name": "대파", "category": "알수없음", "quantity": 1, "unit": "단"},
+    ]})
+    body = client.post("/api/fridge/scan", headers=user_headers, json={"image": img, "mime": "image/png"}).json()
+    assert [i["name"] for i in body["items"]] == ["계란", "대파"]
+    assert body["items"][1]["category"] == "기타"
+
+
+def test_recipe_chef_style(client, user_headers):
+    styles = client.get("/api/recipes/chef-styles").json()
+    assert set(styles) == {"baek", "ahn", "lee", "choi", "shim"}
+    r = client.post("/api/recipes/generate", headers=user_headers, json={"style": "lee"})
+    assert r.status_code == 200 and r.json()["data"]["style"] == "lee"
+    assert r.json()["title"].startswith("[이연복 스타일]")
+    assert client.post("/api/recipes/generate", headers=user_headers, json={"style": "unknown"}).status_code == 422

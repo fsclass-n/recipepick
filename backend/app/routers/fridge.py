@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import Deal, FridgeItem, User
-from ..schemas import DealOut, FridgeItemIn, FridgeItemOut, FridgeItemUpdate
+from ..schemas import DealOut, FridgeItemIn, FridgeItemOut, FridgeItemUpdate, FridgeScanIn
 from ..security import get_current_user
 from ..services.matcher import names_match
+from ..services.vision import decode_image, scan_fridge
 
 router = APIRouter(prefix="/api/fridge", tags=["fridge"])
 
@@ -35,6 +36,12 @@ def list_items(user: User = Depends(get_current_user), db: Session = Depends(get
         select(FridgeItem).where(FridgeItem.user_id == user.id).order_by(FridgeItem.is_wishlist, FridgeItem.expires_at)
     ).all()
     return _with_deals(list(items), list(db.scalars(select(Deal)).all()))
+
+
+@router.post("/scan")
+def scan(body: FridgeScanIn, user: User = Depends(get_current_user)):
+    """냉장고 사진을 Gemini 로 분석해 식재료 후보를 반환한다(저장하지 않음)."""
+    return scan_fridge(decode_image(body.image, body.mime), body.mime)
 
 
 @router.post("", response_model=FridgeItemOut, status_code=201)

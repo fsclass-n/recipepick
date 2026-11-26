@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { api, CATEGORY_ICONS, HEALTH_LABELS, won } from "../lib/api";
 import { IMG, unsplash } from "../lib/images";
+import MartLogo from "../components/MartLogo";
 
 // 건강 목표별 "식단 룩북" 컬렉션 — 각 컬렉션은 AI 레시피 창작 시 적용되는 영양 기준과 1:1 대응한다.
 const LOOKBOOK = [
@@ -35,6 +36,7 @@ const MARTS = [
   { name: "홈플러스", badge: "실시간 수집", live: true, note: "공개 검색 페이지 기준 자동 수집" },
   { name: "이마트", badge: "데모 데이터", note: "공식 제휴·API 연동 준비 중" },
   { name: "롯데마트", badge: "데모 데이터", note: "공식 제휴·API 연동 준비 중" },
+  { name: "오이마켓", badge: "데모 데이터", note: "사이트 점검 중 · 복구 시 자동 수집 전환" },
 ];
 
 const FAQ = [
@@ -159,7 +161,7 @@ function Marquee({ deals }) {
     : [["매시간 할인 수집", "RPA", "홈플러스"], ["건강 맞춤 레시피", "AI", "Gemini"], ["임박 재료 우선", "Rescue", "냉장고"]];
   const row = [...items, ...items];
   return (
-    <div className="overflow-hidden border-y border-leaf-950 bg-leaf-900 py-4 text-white dark:border-black dark:bg-black" aria-label="오늘의 할인 식재료">
+    <div className="overflow-hidden border-y border-leaf-950 bg-leaf-900 py-4 text-white dark:border-ink-deep dark:bg-ink-deep" aria-label="오늘의 할인 식재료">
       <div className="flex w-max animate-marquee gap-10 hover:[animation-play-state:paused]">
         {row.map(([name, rate, mart], i) => (
           <span key={i} className="flex shrink-0 items-center gap-3 text-sm">
@@ -198,7 +200,7 @@ function RescueSection({ stats }) {
             {PILLARS.map((p) => (
               <div key={p.en} className="bg-cream p-6 dark:bg-ink">
                 <div className="flex items-center justify-between">
-                  <span className="grid size-11 place-items-center rounded-full bg-leaf-800 text-white dark:bg-leaf-300 dark:text-leaf-950"><i className={`fa-solid ${p.icon}`} /></span>
+                  <span className="grid size-11 place-items-center rounded-full bg-leaf-800 text-white dark:bg-honey-300 dark:text-ink"><i className={`fa-solid ${p.icon}`} /></span>
                   <span className="serif-en text-lg text-stone-300 dark:text-stone-600">{p.en}</span>
                 </div>
                 <h3 className="mt-5 text-lg">{p.title}</h3>
@@ -287,7 +289,7 @@ function DealsSection({ stats, startTo }) {
             <Link to={startTo} key={d.name + d.mart} className="group block">
               <div className="relative aspect-square overflow-hidden rounded-2xl bg-white dark:bg-ink-soft">
                 {d.image_url ? (
-                  <img src={d.image_url} alt={d.name} loading="lazy" className="img-zoom size-full object-contain p-5" />
+                  <img src={d.image_url} alt={d.name} loading="lazy" className={`img-zoom size-full ${d.source === "demo" ? "object-cover" : "object-contain p-5"}`} />
                 ) : (
                   <div className="grid size-full place-items-center bg-gradient-to-br from-leaf-50 to-paper dark:from-ink-line dark:to-ink">
                     <i className={`fa-solid ${CATEGORY_ICONS[d.category] || CATEGORY_ICONS.기타} text-5xl text-leaf-400/70 transition group-hover:scale-110`} />
@@ -307,10 +309,10 @@ function DealsSection({ stats, startTo }) {
             </Link>
           ))}
         </div>
-        <div className="mt-14 grid gap-3 sm:grid-cols-3">
+        <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {MARTS.map((m) => (
             <div key={m.name} className="flex items-center gap-4 rounded-2xl border border-stone-200 p-4 dark:border-ink-line">
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-paper font-display text-sm dark:bg-ink-soft">{m.name.slice(0, 2)}</span>
+              <MartLogo mart={m.name} className="h-12 w-24" />
               <div>
                 <p className="font-semibold">
                   {m.name}
@@ -358,8 +360,8 @@ function FaqSection() {
     <section id="faq" className="section-y scroll-mt-24 bg-paper/60 dark:bg-ink-soft/40">
       <div className="container-x grid gap-12 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <SectionHead eyebrow="FAQ" title="자주 묻는 질문" desc="더 궁금한 점은 고객센터 이메일로 문의해 주세요." />
-          <a href="mailto:whyeil@naver.com" className="btn-ghost mt-6"><i className="fa-regular fa-envelope" />이메일 문의</a>
+          <SectionHead eyebrow="FAQ" title="자주 묻는 질문" desc="더 궁금한 점은 고객센터(1588-0000)로 문의해 주세요." />
+          <a href="tel:1588-0000" className="btn-ghost mt-6"><i className="fa-solid fa-phone" />고객센터 1588-0000</a>
         </div>
         <div className="divide-y divide-stone-200 border-y border-stone-200 lg:col-span-8 dark:divide-ink-line dark:border-ink-line">
           {FAQ.map((f, i) => (

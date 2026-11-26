@@ -44,4 +44,7 @@ def user_headers(client):
 
 @pytest.fixture(scope="session")
 def admin_headers(client):
-    return _login(client, "admin@recipepick.dev", "Admin!2026")
+    # 실제 관리자 권한은 .env ADMIN_ACCESS_KEY 로그인으로만 발급된다
+    r = client.post("/api/auth/admin-login", json={"access_key": "test-admin-access-key"})
+    assert r.status_code == 200, r.text
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}

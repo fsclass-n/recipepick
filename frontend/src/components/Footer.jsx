@@ -35,12 +35,12 @@ const COLUMNS = [
 const SOCIAL = [
   ["fa-brands fa-github", "https://github.com/fsclass-n/recipepick", "GitHub"],
   ["fa-solid fa-book-open", "https://fsclass-n.github.io/recipepick/", "프로젝트 안내"],
-  ["fa-solid fa-envelope", "mailto:whyeil@naver.com", "이메일 문의"],
+  ["fa-solid fa-phone", "tel:1588-0000", "고객센터 1588-0000"],
 ];
 
 function FooterLink({ to, href, label, strong }) {
   const cls = `link-underline text-[13px] transition ${strong ? "font-semibold text-stone-700 dark:text-stone-200" : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white"}`;
-  if (href) return <a href={href} target={href.startsWith("mailto") ? undefined : "_blank"} rel="noreferrer" className={cls}>{label}</a>;
+  if (href) return <a href={href} target={/^(mailto|tel):/.test(href) ? undefined : "_blank"} rel="noreferrer" className={cls}>{label}</a>;
   return <Link to={to} className={cls}>{label}</Link>;
 }
 
@@ -76,7 +76,7 @@ export default function Footer() {
             </p>
             <div className="mt-6 flex gap-2">
               {SOCIAL.map(([icon, href, label]) => (
-                <a key={label} href={href} target={href.startsWith("mailto") ? undefined : "_blank"} rel="noreferrer" aria-label={label} title={label}
+                <a key={label} href={href} target={/^(mailto|tel):/.test(href) ? undefined : "_blank"} rel="noreferrer" aria-label={label} title={label}
                   className="grid size-10 place-items-center rounded-full border border-stone-300 text-stone-600 transition hover:border-leaf-800 hover:bg-leaf-800 hover:text-white dark:border-ink-line dark:text-stone-300">
                   <i className={icon} />
                 </a>
@@ -95,8 +95,8 @@ export default function Footer() {
           </div>
           <div className="lg:col-span-3">
             <p className="eyebrow !text-stone-400">고객센터</p>
-            <a href="mailto:whyeil@naver.com" className="mt-4 block font-display text-xl text-leaf-900 hover:text-tomato-600 dark:text-stone-100">whyeil@naver.com</a>
-            <p className="mt-2 text-[13px] leading-relaxed text-stone-500 dark:text-stone-400">서비스 이용 · 제휴 문의는 이메일 또는 GitHub 이슈로 남겨 주세요.</p>
+            <a href="tel:1588-0000" className="mt-4 block font-display text-3xl tracking-tight text-leaf-900 hover:text-tomato-600 dark:text-stone-100">1588-0000</a>
+            <p className="mt-2 text-[13px] leading-relaxed text-stone-500 dark:text-stone-400">평일 09:00 – 18:00 (점심 12:00 – 13:00)<br />주말 · 공휴일 휴무</p>
             <a href="https://github.com/fsclass-n/recipepick/issues" target="_blank" rel="noreferrer" className="btn-ghost mt-4 py-2 text-xs">
               <i className="fa-brands fa-github" />이슈 남기기
             </a>
@@ -109,7 +109,7 @@ export default function Footer() {
               <b className="font-semibold text-stone-700 dark:text-stone-200">RecipePick</b>
               <span className="mx-2 text-stone-300">|</span>대표 홍기흥
               <span className="mx-2 text-stone-300">|</span>개인정보 보호책임자 홍기흥
-              <span className="mx-2 text-stone-300">|</span>whyeil@naver.com
+              <span className="mx-2 text-stone-300">|</span>고객센터 1588-0000
             </p>
             <p>할인 정보는 각 마트 공개 페이지 기준이며 실제 매장 가격과 다를 수 있습니다. DEMO 표시 상품은 시뮬레이션 데이터입니다.</p>
             <p>AI 레시피와 영양 정보는 일반적인 식단 참고용이며 의학적 진단·처방을 대체하지 않습니다.</p>

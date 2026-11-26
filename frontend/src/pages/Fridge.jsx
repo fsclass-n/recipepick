@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useRealtime } from "../context/RealtimeContext";
 import { api, CATEGORY_ICONS, won } from "../lib/api";
+import FridgeScanner from "../components/FridgeScanner";
 import PageHero from "../components/PageHero";
 import { IMG } from "../lib/images";
 
@@ -74,6 +75,7 @@ export default function Fridge() {
   const [cat, setCat] = useState("전체");
   const [form, setForm] = useState(EMPTY);
   const [showForm, setShowForm] = useState(false);
+  const [showScan, setShowScan] = useState(false);
 
   const load = () => api("/api/fridge").then(setItems).catch((e) => toast({ title: "불러오기 실패", message: e.message, tone: "error" }));
   useEffect(() => {
@@ -128,9 +130,17 @@ export default function Fridge() {
         title="냉장고 파먹기"
         desc={<>유통기한 임박 재료부터 먼저. 할인 중인 재료는 <span className="font-semibold text-tomato-300">주황색 테두리</span>로 자동 하이라이트됩니다.</>}
       >
+        <button onClick={() => setShowScan((s) => !s)} className="btn bg-tomato-500 text-white hover:bg-tomato-600"><i className={`fa-solid ${showScan ? "fa-xmark" : "fa-camera"}`} />사진으로 등록</button>
         <button onClick={() => setShowForm((s) => !s)} className="btn bg-white text-leaf-900 hover:bg-cream"><i className={`fa-solid ${showForm ? "fa-xmark" : "fa-plus"}`} />재료 추가</button>
-        <Link to="/recipe" className="btn-accent"><i className="fa-solid fa-wand-magic-sparkles" />AI 레시피</Link>
+        <Link to="/recipe" className="btn border border-white/40 text-white hover:bg-white/10"><i className="fa-solid fa-wand-magic-sparkles" />AI 레시피</Link>
       </PageHero>
+
+      {showScan && (
+        <FridgeScanner
+          onClose={() => setShowScan(false)}
+          onAdded={() => { setShowScan(false); setTab("fridge"); load(); }}
+        />
+      )}
 
       {showForm && (
         <form onSubmit={add} className="card grid animate-fade-up grid-cols-2 gap-3 p-4 sm:grid-cols-6 sm:items-end">

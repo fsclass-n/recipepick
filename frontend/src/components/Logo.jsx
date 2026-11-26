@@ -2,9 +2,9 @@
 export function LogoMark({ className = "size-9" }) {
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
-      <rect width="48" height="48" rx="14" className="fill-leaf-800 dark:fill-leaf-300" />
-      <path d="M24.6 23.6C24.6 15.6 29.1 10.6 36.6 9.6C36.6 17.6 32.1 22.6 24.6 23.6Z" className="fill-leaf-300 dark:fill-leaf-700" />
-      <path d="M23.4 22.2C22.4 16.7 18.9 13.7 13.4 13.7C13.4 18.7 16.9 22.2 23.4 22.2Z" className="fill-leaf-200 dark:fill-leaf-600" />
+      <rect width="48" height="48" rx="14" className="fill-leaf-800 dark:fill-honey-300" />
+      <path d="M24.6 23.6C24.6 15.6 29.1 10.6 36.6 9.6C36.6 17.6 32.1 22.6 24.6 23.6Z" className="fill-leaf-300 dark:fill-leaf-600" />
+      <path d="M23.4 22.2C22.4 16.7 18.9 13.7 13.4 13.7C13.4 18.7 16.9 22.2 23.4 22.2Z" className="fill-leaf-200 dark:fill-leaf-500" />
       <path d="M9.5 25.5H38.5C38.5 33.5 32 39.5 24 39.5S9.5 33.5 9.5 25.5Z" className="fill-cream dark:fill-ink" />
       <path d="M18.4 31.2L22.3 34.6L29.8 28" fill="none" className="stroke-tomato-500" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>

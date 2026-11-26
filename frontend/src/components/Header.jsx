@@ -82,7 +82,7 @@ function UserMenu({ onLogout }) {
   return (
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 rounded-full border border-stone-200 py-1 pr-3 pl-1 transition hover:border-stone-400 dark:border-ink-line" aria-haspopup="menu" aria-expanded={open}>
-        <span className="grid size-8 place-items-center rounded-full bg-leaf-800 font-display text-sm text-white dark:bg-leaf-300 dark:text-leaf-950">{user.name?.[0] || "R"}</span>
+        <span className="grid size-8 place-items-center rounded-full bg-leaf-800 font-display text-sm text-white dark:bg-honey-300 dark:text-ink">{user.name?.[0] || "R"}</span>
         <span className="hidden max-w-28 truncate text-sm font-semibold xl:inline">{user.name}</span>
         <i className={`fa-solid fa-chevron-down text-[10px] text-stone-400 transition ${open ? "rotate-180" : ""}`} />
       </button>
@@ -119,7 +119,7 @@ function AnnouncementBar() {
     api("/api/public/stats").then(setStats).catch(() => {});
   }, []);
   return (
-    <div className="bg-leaf-900 text-[12px] text-white/75 dark:bg-black">
+    <div className="bg-leaf-900 text-[12px] text-white/75 dark:bg-ink-deep">
       <div className="container-x flex h-9 items-center justify-between gap-4">
         <p className="flex min-w-0 items-center gap-2">
           <span className="relative flex size-2 shrink-0">
@@ -137,7 +137,7 @@ function AnnouncementBar() {
         <nav className="hidden shrink-0 items-center gap-5 md:flex">
           <Link to="/#how" className="link-underline hover:text-white">이용 가이드</Link>
           <Link to="/#faq" className="link-underline hover:text-white">자주 묻는 질문</Link>
-          <a href="mailto:whyeil@naver.com" className="link-underline hover:text-white">고객센터</a>
+          <a href="tel:1588-0000" className="link-underline hover:text-white"><i className="fa-solid fa-phone mr-1 text-[10px]" />고객센터 1588-0000</a>
         </nav>
       </div>
     </div>

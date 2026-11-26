@@ -5,6 +5,7 @@
 /*
  * RecipePick 디자인 시스템 — "Rescue Kitchen" 에디토리얼
  * 웜 페이퍼 배경 + 딥 허브 그린 + 테라코타 포인트, 세리프 헤드라인으로 매거진형 레이아웃.
+ * 다크 모드는 에스프레소·코코아 브라운 바탕에 허니(꿀)·파프리카 포인트로 음식 사진이 돋보이게 한다.
  * 토큰 이름(leaf/tomato/cream/ink)은 기존 페이지 호환을 위해 유지하고 값만 교체한다.
  */
 @theme {
@@ -33,11 +34,17 @@
   --color-tomato-600: #c4522a;
   --color-tomato-700: #9e3f1f;
 
+  --color-honey-200: #f8dfa6;
+  --color-honey-300: #f2c879;
+  --color-honey-400: #e9ae4c;
+
   --color-cream: #faf8f3;
   --color-paper: #f3efe6;
-  --color-ink: #111412;
-  --color-ink-soft: #191d1a;
-  --color-ink-line: #2a302b;
+  /* 다크 모드: 로스팅한 원두·코코아 톤의 따뜻한 브라운(식욕을 돋우는 저녁 식탁 조명 느낌) */
+  --color-ink: #16110d;
+  --color-ink-soft: #211913;
+  --color-ink-line: #3a2c22;
+  --color-ink-deep: #0e0a07;
 
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -81,6 +88,15 @@
     @apply bg-cream font-sans text-[15px] text-stone-800 antialiased transition-colors duration-300 dark:bg-ink dark:text-stone-200;
     word-break: keep-all;
   }
+  .dark body {
+    background-image:
+      radial-gradient(1100px 560px at 8% -8%, rgba(233, 174, 76, 0.09), transparent 60%),
+      radial-gradient(900px 520px at 100% 0%, rgba(224, 103, 58, 0.08), transparent 60%);
+    background-attachment: fixed;
+  }
+  .dark ::selection {
+    @apply bg-honey-300 text-ink;
+  }
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
     font-weight: 700;
@@ -105,7 +121,7 @@
   @apply py-20 sm:py-28;
 }
 @utility eyebrow {
-  @apply text-[11px] font-semibold tracking-[0.22em] text-tomato-600 uppercase dark:text-tomato-400;
+  @apply text-[11px] font-semibold tracking-[0.22em] text-tomato-600 uppercase dark:text-honey-300;
 }
 @utility serif-en {
   font-family: var(--font-serif-en);
@@ -121,7 +137,7 @@
   @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45;
 }
 @utility btn-primary {
-  @apply btn bg-leaf-800 text-white hover:bg-leaf-900 dark:bg-leaf-300 dark:text-leaf-950 dark:hover:bg-leaf-200;
+  @apply btn bg-leaf-800 text-white hover:bg-leaf-900 dark:bg-honey-300 dark:text-ink dark:hover:bg-honey-200;
 }
 @utility btn-accent {
   @apply btn bg-tomato-500 text-white hover:bg-tomato-600;
@@ -130,7 +146,7 @@
   @apply btn border border-stone-300 bg-transparent text-stone-800 hover:border-stone-800 hover:bg-white dark:border-ink-line dark:text-stone-200 dark:hover:border-stone-400 dark:hover:bg-ink-soft;
 }
 @utility input {
-  @apply w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 transition focus:border-leaf-600 focus:ring-4 focus:ring-leaf-600/10 focus:outline-none dark:border-ink-line dark:bg-ink dark:text-stone-100;
+  @apply w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 transition focus:border-leaf-600 focus:ring-4 focus:ring-leaf-600/10 focus:outline-none dark:border-ink-line dark:bg-ink dark:text-stone-100 dark:focus:border-honey-400 dark:focus:ring-honey-400/15;
 }
 @utility label {
   @apply mb-1.5 block text-xs font-semibold text-stone-600 dark:text-stone-400;

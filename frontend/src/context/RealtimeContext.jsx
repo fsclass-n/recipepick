@@ -66,6 +66,16 @@ export function RealtimeProvider({ children }) {
         } else if (msg.type === "profile_changed") {
           setUser(msg.data);
           toast({ title: "회원 정보 변경", message: `관리자에 의해 권한/프로필이 변경되었습니다. (현재: ${msg.data.role === "admin" ? "관리자" : "일반 회원"})`, icon: "fa-user-shield" });
+        } else if (msg.type === "account_removed") {
+          closed = true;
+          toast({
+            title: msg.data?.reason === "kicked" ? "계정이 강퇴되었습니다" : "회원 탈퇴가 완료되었습니다",
+            message: msg.data?.reason === "kicked" ? "관리자에 의해 계정과 데이터가 삭제되어 로그아웃됩니다." : "그동안 RecipePick 을 이용해 주셔서 감사합니다.",
+            tone: msg.data?.reason === "kicked" ? "error" : "info",
+            icon: "fa-user-slash",
+            duration: 8000,
+          });
+          window.dispatchEvent(new Event("rp:unauthorized"));
         }
         listeners.current.forEach((fn) => fn(msg));
       };

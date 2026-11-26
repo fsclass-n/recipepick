@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..database import db_backend_name, get_db
+from ..database import db_status, get_db
 from ..models import CrawlJob, Deal, Notification, Recipe, User
 from ..schemas import AdminUserUpdate, CrawlerSettingsIn, CrawlJobOut, UserOut
 from ..security import require_admin
 from ..services.crawler import crawler_service
+from ..services.accounts import delete_account, ensure_deletable
 from ..services.notifier import manager
 
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(require_admin)])
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(re
 @router.get("/overview")
 def overview(db: Session = Depends(get_db)):
     count = lambda m: db.scalar(select(func.count(m.id))) or 0  # noqa: E731
+    status = db_status()
     return {
         "users": count(User),
         "admins": db.scalar(select(func.count(User.id)).where(User.role == "admin")) or 0,
@@ -25,7 +27,9 @@ def overview(db: Session = Depends(get_db)):
         "notifications": count(Notification),
         "jobs": count(CrawlJob),
         "online_users": manager.online_count,
-        "database": db_backend_name(),
+        "database": status["backend"],
+        "database_version": status["version"],
+        "database_failover": status["failover"],
     }
 
 
@@ -129,3 +133,16 @@ async def update_user(user_id: int, body: AdminUserUpdate, admin: User = Depends
     manager.set_admin(user.id, user.role == "admin")
     await manager.send_user(user.id, {"type": "profile_changed", "data": out.model_dump(mode="json")})
     return out
+
+
+@router.delete("/users/{user_id}", status_code=204)
+async def kick_user(user_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    """강퇴: 회원과 관련 데이터를 삭제하고, 접속 중이면 즉시 로그아웃시킨다."""
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(404, "회원을 찾을 수 없습니다.")
+    if user.id == admin.id:
+        raise HTTPException(400, "자기 자신은 강퇴할 수 없습니다. 회원 탈퇴를 이용하세요.")
+    ensure_deletable(db, user)
+    await manager.send_user(user.id, {"type": "account_removed", "data": {"reason": "kicked"}})
+    delete_account(db, user)

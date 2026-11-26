@@ -75,7 +75,7 @@ function CrawlerTab() {
     ["fa-tags", "수집 할인 상품", overview?.deals, `평균 ${stats?.summary?.avg_discount ?? 0}% 할인`],
     ["fa-robot", "크롤링 작업", overview?.jobs, `성공률 ${stats?.summary?.success_rate ?? 0}%`],
     ["fa-bowl-food", "생성 레시피", overview?.recipes, `알림 ${overview?.notifications ?? 0}건`],
-    ["fa-database", "데이터베이스", overview?.database?.toUpperCase(), ({ tidb: "TiDB Cloud 연결", mysql: "MySQL · AWS RDS", sqlite: "로컬 SQLite" })[overview?.database] || "-"],
+    ["fa-database", "데이터베이스", overview?.database?.toUpperCase(), overview?.database_failover ? "RDS 중지 → TiDB 자동 전환 중" : ({ tidb: "TiDB Cloud 연결", mysql: `AWS RDS · MySQL ${overview?.database_version || ""}`, sqlite: "로컬 SQLite", unavailable: "DB 연결 불가" })[overview?.database] || "-"],
   ];
 
   return (
@@ -196,6 +196,26 @@ function UsersTab() {
     }
   };
 
+  const protectedUser = (u) => u.id === me.id || ["user@recipepick.dev", "admin@recipepick.dev"].includes(u.email);
+  const kick = async (u) => {
+    if (!window.confirm(`${u.name}(${u.email}) 회원을 강퇴할까요?
+냉장고·레시피·알림 데이터가 함께 삭제되며 복구할 수 없습니다.`)) return;
+    try {
+      await api(`/api/admin/users/${u.id}`, { method: "DELETE" });
+      setUsers((list) => list.filter((x) => x.id !== u.id));
+      toast({ title: "강퇴 완료", message: `${u.name} 회원과 관련 데이터를 삭제했습니다.`, tone: "success", icon: "fa-user-slash" });
+    } catch (e) {
+      toast({ title: "강퇴 실패", message: e.message, tone: "error" });
+    }
+  };
+  const KickButton = ({ u }) => (
+    <button onClick={() => kick(u)} disabled={readOnly || protectedUser(u)}
+      title={readOnly ? "읽기 전용 모드" : protectedUser(u) ? "본인·데모 테스트 계정은 강퇴할 수 없습니다" : "강퇴"}
+      className="inline-flex items-center gap-1 rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-35 dark:border-rose-900 dark:text-rose-300 dark:hover:bg-rose-950/30">
+      <i className="fa-solid fa-user-slash" />강퇴
+    </button>
+  );
+
   return (
     <section className="card p-5">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -208,7 +228,7 @@ function UsersTab() {
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-stone-500">
-            <tr><th className="py-2">회원</th><th>가입</th><th>건강 타입</th><th>최근 로그인</th><th className="text-center">관리자</th><th className="text-center">활성</th></tr>
+            <tr><th className="py-2">회원</th><th>가입</th><th>건강 타입</th><th>최근 로그인</th><th className="text-center">관리자</th><th className="text-center">활성</th><th className="text-center">강퇴</th></tr>
           </thead>
           <tbody>
             {users.map((u) => (
@@ -226,6 +246,7 @@ function UsersTab() {
                 <td className="text-xs text-stone-500">{u.last_login_at ? timeAgo(u.last_login_at) : "-"}</td>
                 <td className="text-center"><Toggle checked={u.role === "admin"} disabled={readOnly || u.id === me.id} onChange={(v) => update(u, { role: v ? "admin" : "user" })} label="관리자 권한" /></td>
                 <td className="text-center"><Toggle checked={u.is_active} disabled={readOnly || u.id === me.id} onChange={(v) => update(u, { is_active: v })} label="활성 상태" /></td>
+                <td className="text-center"><KickButton u={u} /></td>
               </tr>
             ))}
           </tbody>
@@ -246,6 +267,7 @@ function UsersTab() {
                 {Object.entries(HEALTH_LABELS).map(([k, h]) => <option key={k} value={k}>{h.label}</option>)}
               </select>
               <label className="flex items-center gap-1.5 text-xs">관리자<Toggle checked={u.role === "admin"} disabled={readOnly || u.id === me.id} onChange={(v) => update(u, { role: v ? "admin" : "user" })} label="관리자 권한" /></label>
+              <KickButton u={u} />
             </div>
           </li>
         ))}

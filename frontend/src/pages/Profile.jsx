@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { HEALTH_LABELS } from "../lib/api";
@@ -12,6 +13,64 @@ const GUIDES = {
   hypertension: "1인분 나트륨 600mg 이하(DASH 식단), 칼륨 풍부 채소",
   cholesterol: "포화지방 최소화, 오메가-3·식이섬유 강화, 생선·두부 위주",
 };
+
+const PROTECTED = ["user@recipepick.dev", "admin@recipepick.dev"];
+
+function WithdrawSection() {
+  const { user, withdraw, readOnly } = useAuth();
+  const { toast } = useRealtime();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [secret, setSecret] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const isLocal = user.provider === "local";
+  const blocked = readOnly || PROTECTED.includes(user.email);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await withdraw(isLocal ? { password: secret } : { confirm: secret });
+      toast({ title: "회원 탈퇴 완료", message: "냉장고·레시피·알림 데이터가 모두 삭제되었습니다. 이용해 주셔서 감사합니다.", tone: "info", icon: "fa-user-slash", duration: 8000 });
+      navigate("/", { replace: true });
+    } catch (err) {
+      toast({ title: "탈퇴 실패", message: err.message, tone: "error" });
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="card border-rose-200 p-6 dark:border-rose-900/50">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg text-rose-700 dark:text-rose-300">회원 탈퇴</h2>
+          <p className="mt-1 text-sm text-stone-500">탈퇴하면 건강 프로필, 냉장고·장바구니, AI 레시피, 알림 기록이 즉시 삭제되며 복구할 수 없습니다.</p>
+        </div>
+        {!open && (
+          <button onClick={() => setOpen(true)} disabled={blocked} className="btn shrink-0 border border-rose-300 text-rose-700 hover:bg-rose-50 dark:border-rose-900 dark:text-rose-300 dark:hover:bg-rose-950/30"
+            title={blocked ? "테스트 계정·읽기 전용 모드에서는 탈퇴할 수 없습니다" : undefined}>
+            <i className="fa-solid fa-user-slash" />회원 탈퇴
+          </button>
+        )}
+      </div>
+      {blocked && <p className="mt-3 text-xs text-stone-400"><i className="fa-solid fa-lock mr-1" />데모용 테스트 계정과 테스트 관리자(읽기 전용)는 탈퇴할 수 없습니다.</p>}
+      {open && !blocked && (
+        <form onSubmit={submit} className="mt-5 animate-fade-up space-y-3 rounded-2xl bg-rose-50/60 p-4 dark:bg-rose-950/20">
+          <label className="label" htmlFor="withdraw-secret">{isLocal ? "본인 확인을 위해 비밀번호를 입력하세요" : "확인을 위해 '탈퇴'를 입력하세요"}</label>
+          <input id="withdraw-secret" type={isLocal ? "password" : "text"} autoComplete={isLocal ? "current-password" : "off"} className="input" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder={isLocal ? "비밀번호" : "탈퇴"} />
+          <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="size-4 accent-rose-600" />모든 데이터가 삭제되며 복구할 수 없음을 확인했습니다.
+          </label>
+          <div className="flex gap-2">
+            <button type="submit" disabled={busy || !agree || !secret} className="btn bg-rose-600 text-white hover:bg-rose-700">{busy && <i className="fa-solid fa-spinner fa-spin" />}탈퇴하기</button>
+            <button type="button" onClick={() => { setOpen(false); setSecret(""); setAgree(false); }} className="btn-ghost">취소</button>
+          </div>
+        </form>
+      )}
+    </section>
+  );
+}
 
 export default function Profile() {
   const { user, updateProfile } = useAuth();
@@ -43,7 +102,7 @@ export default function Profile() {
       />
       <form onSubmit={save} className="card space-y-5 p-6">
         <div className="flex items-center gap-4">
-          <span className="grid size-16 place-items-center rounded-2xl bg-leaf-600 font-display text-2xl text-white">{user.name.slice(0, 1)}</span>
+          <span className="grid size-16 place-items-center rounded-2xl bg-leaf-800 font-display text-2xl text-white dark:bg-honey-300 dark:text-ink">{user.name.slice(0, 1)}</span>
           <div>
             <p className="font-semibold">{user.email}</p>
             <p className="text-xs text-stone-500">
@@ -79,6 +138,7 @@ export default function Profile() {
         </div>
         <button disabled={busy} className="btn-primary w-full sm:w-auto">{busy && <i className="fa-solid fa-spinner fa-spin" />}<i className="fa-solid fa-floppy-disk" />저장</button>
       </form>
+      <WithdrawSection />
     </div>
   );
 }

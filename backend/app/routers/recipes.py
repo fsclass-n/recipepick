@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import Deal, FridgeItem, Recipe, User
-from ..schemas import HEALTH_TYPES, RecipeOut, RecipeRequest
+from ..schemas import CHEF_STYLES, HEALTH_TYPES, RecipeOut, RecipeRequest
 from ..security import get_current_user
 from ..services.gemini import create_recipe
 from ..services.matcher import names_match
@@ -32,6 +32,11 @@ def _to_out(r: Recipe) -> RecipeOut:
 @router.get("/health-types")
 def health_types():
     return HEALTH_TYPES
+
+
+@router.get("/chef-styles")
+def chef_styles():
+    return CHEF_STYLES
 
 
 @router.post("/generate", response_model=RecipeOut)
@@ -61,7 +66,7 @@ def generate(body: RecipeRequest, user: User = Depends(get_current_user), db: Se
     allergy_note = f"알레르기: {user.allergies} (절대 사용 금지)" if user.allergies else ""
     notes = " / ".join(x for x in (body.notes, allergy_note) if x)
     data, source = create_recipe(
-        fridge_names, deals, health_type, body.servings, body.max_minutes, notes, user.daily_kcal
+        fridge_names, deals, health_type, body.servings, body.max_minutes, notes, user.daily_kcal, body.style
     )
     data["used_deals"] = deals
     data["fridge_ingredients"] = fridge_names

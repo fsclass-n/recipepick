@@ -2,14 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useRealtime } from "../context/RealtimeContext";
 import { api, CATEGORY_ICONS, timeAgo, won } from "../lib/api";
+import MartLogo, { MARTS } from "../components/MartLogo";
 import PageHero from "../components/PageHero";
 import { IMG } from "../lib/images";
 
-const MART_COLORS = {
-  이마트: "bg-yellow-400 text-stone-900",
-  롯데마트: "bg-red-600 text-white",
-  홈플러스: "bg-rose-500 text-white",
-};
 
 export default function Deals() {
   const { toast, subscribe } = useRealtime();
@@ -51,15 +47,15 @@ export default function Deals() {
         image={IMG.groceryShelf}
         eyebrow="Today's Rescue Deals"
         title="마감세일 · 할인 식재료"
-        desc={<>RPA(Playwright)가 이마트·롯데마트·홈플러스 할인가를 주기적으로 수집합니다.{summary?.last_collected_at && <span className="ml-1 font-semibold text-tomato-300">· {timeAgo(summary.last_collected_at)} 갱신</span>}</>}
+        desc={<>RPA(Playwright)가 이마트·롯데마트·홈플러스·오이마켓 할인가를 주기적으로 수집합니다.{summary?.last_collected_at && <span className="ml-1 font-semibold text-tomato-300">· {timeAgo(summary.last_collected_at)} 갱신</span>}</>}
       />
 
       {summary && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {summary.marts.map((m) => (
             <button key={m.mart} onClick={() => setFilter((f) => ({ ...f, mart: f.mart === m.mart ? "" : m.mart }))}
               className={`card flex items-center gap-3 p-4 text-left transition hover:-translate-y-0.5 ${filter.mart === m.mart ? "ring-2 ring-leaf-500" : ""}`}>
-              <span className={`grid size-12 shrink-0 place-items-center rounded-xl font-display text-sm ${MART_COLORS[m.mart] || "bg-stone-200"}`}>{m.mart.slice(0, 2)}</span>
+              <MartLogo mart={m.mart} className="h-12 w-24" />
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">{m.mart} <span className="text-xs font-normal text-stone-400">{m.count}개</span></p>
                 <p className="text-xs text-stone-500">평균 {m.avg_discount}% 할인 · 총 {won(m.total_saving)} 절약</p>
@@ -103,7 +99,7 @@ export default function Deals() {
             <article key={d.id} className="card group flex animate-fade-up flex-col overflow-hidden p-0" style={{ animationDelay: `${Math.min(idx, 12) * 25}ms` }}>
               <div className="relative grid h-28 place-items-center bg-gradient-to-br from-leaf-50 to-leaf-100 dark:from-ink-line dark:to-ink">
                 {d.image_url ? <img src={d.image_url} alt="" className="h-full w-full object-cover" loading="lazy" /> : <i className={`fa-solid ${CATEGORY_ICONS[d.category] || CATEGORY_ICONS.기타} text-4xl text-leaf-500/70 transition group-hover:scale-110`} />}
-                <span className={`absolute top-2 left-2 chip ${MART_COLORS[d.mart] || "bg-stone-600 text-white"}`}>{d.mart}</span>
+                <span className={`absolute top-2 left-2 chip ${MARTS[d.mart]?.chip || "bg-stone-600 text-white"}`}>{d.mart}</span>
                 {d.is_closing_sale && <span className="absolute top-2 right-2 chip animate-pulse bg-tomato-500 text-white"><i className="fa-solid fa-clock" />마감</span>}
                 {d.source === "demo" && <span className="absolute bottom-2 right-2 chip bg-black/40 text-[10px] text-white">DEMO</span>}
               </div>

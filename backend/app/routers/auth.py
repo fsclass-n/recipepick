@@ -11,7 +11,9 @@ from sqlalchemy.orm import Session
 from ..config import get_settings
 from ..database import get_db
 from ..models import User, utcnow
-from ..schemas import AdminKeyIn, LoginIn, ProfileUpdate, RegisterIn, TokenOut, UserOut
+from ..schemas import AdminKeyIn, LoginIn, ProfileUpdate, RegisterIn, TokenOut, UserOut, WithdrawIn
+from ..services.accounts import delete_account, ensure_deletable
+from ..services.notifier import manager
 from ..security import (
     create_access_token,
     create_token,
@@ -47,10 +49,10 @@ OAUTH_PROVIDERS = {
 }
 
 
-def _token_response(user: User, db: Session, read_only: bool = False) -> TokenOut:
+def _token_response(user: User, db: Session, read_only: bool = False, admin: bool = False) -> TokenOut:
     user.last_login_at = utcnow()
     db.commit()
-    return TokenOut(access_token=create_access_token(user, read_only), user=UserOut.model_validate(user))
+    return TokenOut(access_token=create_access_token(user, read_only, admin), user=UserOut.model_validate(user))
 
 
 def _first_admin(db: Session) -> User:
@@ -94,7 +96,7 @@ def admin_login(body: AdminKeyIn, db: Session = Depends(get_db)):
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "서버에 관리자 키(ADMIN_ACCESS_KEY)가 설정되지 않았습니다.")
     if not secrets.compare_digest(body.access_key.encode(), settings.admin_access_key.encode()):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "관리자 키가 올바르지 않습니다.")
-    return _token_response(_first_admin(db), db)
+    return _token_response(_first_admin(db), db, admin=True)
 
 
 @router.post("/test-admin", response_model=TokenOut)
@@ -114,6 +116,20 @@ def update_me(body: ProfileUpdate, user: User = Depends(get_current_user), db: S
         setattr(user, k, v)
     db.commit()
     return user
+
+
+@router.delete("/me", status_code=204)
+async def withdraw(body: WithdrawIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """회원 탈퇴: 이메일 가입자는 비밀번호, 소셜 가입자는 '탈퇴' 입력으로 본인 확인."""
+    if user.password_hash:
+        if not verify_password(body.password or "", user.password_hash):
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "비밀번호가 올바르지 않습니다.")
+    elif body.confirm.strip() != "탈퇴":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "확인을 위해 '탈퇴'를 입력해 주세요.")
+    ensure_deletable(db, user)
+    user_id = user.id
+    delete_account(db, user)
+    await manager.send_user(user_id, {"type": "account_removed", "data": {"reason": "withdrawn"}})
 
 
 @router.get("/providers")

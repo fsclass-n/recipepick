@@ -4,6 +4,16 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 HealthType = Literal["general", "diabetes", "diet", "hypertension", "cholesterol"]
+ChefStyle = Literal["", "baek", "ahn", "lee", "choi", "shim"]
+
+# 셰프 스타일: 각 셰프가 공개적으로 알려진 요리 철학에서 영감을 받은 조리 방향(공식 레시피·제휴 아님)
+CHEF_STYLES: dict[str, dict] = {
+    "baek": {"chef": "백종원", "label": "대중 집밥", "guide": "누구나 따라 하는 실패 없는 집밥. 구하기 쉬운 재료, 숟가락·컵 계량, 간장·다진 마늘·설탕의 단짠 균형(건강 기준 안에서 당·나트륨은 줄여서), 응용 팁 제시"},
+    "ahn": {"chef": "안성재", "label": "파인다이닝", "guide": "재료 본연의 맛을 살리는 절제된 간, 정확한 온도·시간, 한식 재료의 현대적 재해석, 마지막 단계에 플레이팅 방법 포함"},
+    "lee": {"chef": "이연복", "label": "정통 중식", "guide": "센 불 웍 요리, 파기름·생강·굴소스 활용, 기름 온도와 불 조절, 전분물로 농도를 맞추는 빠른 중식 조리법"},
+    "choi": {"chef": "최현석", "label": "창작 퓨전", "guide": "의외의 재료 조합과 소스 아이디어로 창의적인 퓨전 요리, 시각적 포인트와 재치 있는 요리명"},
+    "shim": {"chef": "심영순", "label": "전통 한식", "guide": "전통 한식·궁중음식 방식. 양념장 비율과 밑간, 제철 재료와 장(醬) 활용, 고명과 정갈한 조리 순서"},
+}
 
 HEALTH_TYPES: dict[str, dict] = {
     "general": {"label": "일반 건강식", "guide": "균형 잡힌 영양소 구성, 가공식품 최소화"},
@@ -62,6 +72,11 @@ class LoginIn(BaseModel):
     password: str
 
 
+class WithdrawIn(BaseModel):
+    password: str | None = Field(default=None, max_length=128)
+    confirm: str = Field(default="", max_length=20)
+
+
 class AdminKeyIn(BaseModel):
     access_key: str = Field(min_length=1, max_length=256)
 
@@ -86,6 +101,11 @@ class FridgeItemIn(BaseModel):
     unit: str = "개"
     expires_at: date | None = None
     is_wishlist: bool = False
+
+
+class FridgeScanIn(BaseModel):
+    image: str = Field(min_length=10, max_length=7_500_000)  # base64 (data URL 허용), 디코딩 후 5MB 이하
+    mime: str = "image/jpeg"
 
 
 class FridgeItemUpdate(BaseModel):
@@ -136,6 +156,7 @@ class RecipeRequest(BaseModel):
     servings: int = Field(default=2, ge=1, le=8)
     max_minutes: int = Field(default=30, ge=5, le=180)
     notes: str = Field(default="", max_length=500)
+    style: ChefStyle = ""
 
 
 class RecipeOut(ORM):

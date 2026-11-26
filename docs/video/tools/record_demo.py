@@ -13,6 +13,9 @@ import math
 import sys
 import time
 
+import os
+from pathlib import Path
+
 import requests
 from playwright.sync_api import sync_playwright
 
@@ -217,9 +220,28 @@ def api_token(email: str, pw: str) -> str:
     return r.json()["access_token"]
 
 
+def admin_key() -> str:
+    """실제 관리자 권한은 ADMIN_ACCESS_KEY 로그인으로만 발급된다(환경 변수 또는 루트 .env)."""
+    key = os.getenv("ADMIN_ACCESS_KEY", "")
+    if not key:
+        env = Path(__file__).resolve().parents[3] / ".env"
+        for line in env.read_text(encoding="utf-8").splitlines() if env.exists() else []:
+            if line.startswith("ADMIN_ACCESS_KEY="):
+                key = line.split("=", 1)[1].strip()
+    if not key:
+        raise SystemExit("ADMIN_ACCESS_KEY 가 필요합니다 (.env 또는 환경 변수)")
+    return key
+
+
+def admin_api_token() -> str:
+    r = requests.post(f"{API}/api/auth/admin-login", json={"access_key": admin_key()}, timeout=60)
+    r.raise_for_status()
+    return r.json()["access_token"]
+
+
 def ensure_test_user(health: str = "diabetes") -> None:
     """테스트 일반 회원을 시연 기준 상태(일반·활성·당뇨)로 맞춘다."""
-    h = {"Authorization": f"Bearer {api_token(*ADMIN)}"}
+    h = {"Authorization": f"Bearer {admin_api_token()}"}
     users = requests.get(f"{API}/api/admin/users", headers=h, timeout=60).json()
     u = next(x for x in users if x["email"] == USER[0])
     if (u["role"], u["is_active"], u["health_type"]) != ("user", True, health):
@@ -371,7 +393,9 @@ def record_main(browser, marks: dict) -> None:
     r.mark("A01", marks)
     r.click(page.locator("header button[aria-label='로그아웃']"))
     page.wait_for_selector("text=다시 만나서 반가워요", timeout=30000)
-    r.at(4.0); login_via_button(r, "시스템 관리자")
+    r.at(4.0); r.click(page.get_by_role("tab", name="실제 관리자"))
+    page.fill("#admin-key", admin_key())
+    login_via_button(r, "실제 관리자로 로그인")
     page.wait_for_url("**/admin", timeout=30000)
     r.at(8.0); r.hl(page.locator("header nav a", has_text="관리자"), 4000)
     r.until(SC["A01"]["dur"])
@@ -420,10 +444,14 @@ def record_split(browser, marks: dict) -> None:
     lc, rc = new_ctx(browser, 1280, 1440), new_ctx(browser, 1280, 1440)
     lp, rp = lc.new_page(), rc.new_page()
     L, R = Rec(lp, "left"), Rec(rp, "right")
-    for p, label in ((lp, "일반 회원"), (rp, "시스템 관리자")):
-        p.goto(SITE + "/login", wait_until="networkidle")
-        p.locator("button", has_text=label).click()
-        p.wait_for_url("**/dashboard" if label == "일반 회원" else "**/admin", timeout=30000)
+    lp.goto(SITE + "/login", wait_until="networkidle")
+    lp.locator("button", has_text="테스트 회원으로 체험하기").click()
+    lp.wait_for_url("**/dashboard", timeout=30000)
+    # 로그인 유형 분리: 실제 관리자는 '실제 관리자' 탭에서 관리자 키로 로그인
+    rp.goto(SITE + "/login?type=admin", wait_until="networkidle")
+    rp.fill("#admin-key", admin_key())
+    rp.locator("button", has_text="실제 관리자로 로그인").click()
+    rp.wait_for_url("**/admin", timeout=30000)
     rp.locator("button", has_text="회원 관리").click()
     rp.wait_for_selector("table tbody tr", timeout=30000)
     lp.wait_for_selector("text=실시간 알림 현황판", timeout=30000)
