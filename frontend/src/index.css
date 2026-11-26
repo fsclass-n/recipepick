@@ -105,6 +105,9 @@
   ::selection {
     @apply bg-tomato-200 text-leaf-950;
   }
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-tomato-500;
   }
