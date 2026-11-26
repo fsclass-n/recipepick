@@ -74,7 +74,7 @@ def crawler_stats(db: Session = Depends(get_db)):
         figs["discount_by_category"] = px.bar(
             by_cat, x="category", y="discount_rate", color="mart", barmode="group",
             title="카테고리·마트별 평균 할인율(%)", labels={"discount_rate": "할인율", "category": "", "mart": "마트"},
-            color_discrete_sequence=["#16a34a", "#f97316", "#0ea5e9"],
+            color_discrete_sequence=["#3d6536", "#e0673a", "#9fba95"],
         ).update_layout(**layout).to_plotly_json()
         # plotly.js basic 번들에는 histogram 트레이스가 없으므로 NumPy 로 구간을 나눠 막대그래프로 전달
         bins = np.arange(0, 70, 5)
@@ -89,13 +89,13 @@ def crawler_stats(db: Session = Depends(get_db)):
         figs["discount_hist"] = px.bar(
             hist, x="구간", y="건수", color="유형", title="할인율 분포", barmode="stack",
             labels={"구간": "할인율 구간", "유형": ""},
-            color_discrete_map={"일반 할인": "#84cc16", "마감세일": "#ef4444"},
+            color_discrete_map={"일반 할인": "#9fba95", "마감세일": "#e0673a"},
         ).update_layout(**layout).to_plotly_json()
     if not jobs.empty:
         jobs = jobs.sort_values("id")
         figs["jobs_timeline"] = px.line(
             jobs, x="started_at", y="items_collected", markers=True, title="크롤링 수집 건수 추이",
-            labels={"started_at": "", "items_collected": "수집 건수"}, color_discrete_sequence=["#16a34a"],
+            labels={"started_at": "", "items_collected": "수집 건수"}, color_discrete_sequence=["#3d6536"],
         ).update_layout(**layout).to_plotly_json()
     summary = {
         "avg_discount": round(float(deals["discount_rate"].mean()), 1) if not deals.empty else 0,

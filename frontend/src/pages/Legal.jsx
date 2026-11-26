@@ -1,5 +1,3 @@
-import Footer from "../components/Footer";
-import PublicHeader from "../components/PublicHeader";
 
 const DOCS = {
   terms: {
@@ -31,21 +29,18 @@ const DOCS = {
 export default function Legal({ type }) {
   const doc = DOCS[type];
   return (
-    <div className="flex min-h-dvh flex-col">
-      <PublicHeader />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
-        <h1 className="text-3xl text-leaf-950 sm:text-4xl dark:text-leaf-50">{doc.title}</h1>
-        <p className="mt-2 text-sm text-slate-500">시행일 {doc.updated}</p>
-        <div className="card mt-8 space-y-6 p-6 sm:p-8">
-          {doc.sections.map(([h, body]) => (
-            <section key={h}>
-              <h2 className="text-lg text-leaf-900 dark:text-leaf-100">{h}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{body}</p>
-            </section>
-          ))}
-        </div>
-      </main>
-      <Footer />
+    <div className="container-x max-w-3xl py-14 sm:py-20">
+      <p className="eyebrow">Policy</p>
+      <h1 className="mt-3 text-4xl text-leaf-950 sm:text-5xl dark:text-stone-50">{doc.title}</h1>
+      <p className="mt-3 text-sm text-stone-500">시행일 {doc.updated}</p>
+      <div className="mt-10 divide-y divide-stone-200 border-y border-stone-200 dark:divide-ink-line dark:border-ink-line">
+        {doc.sections.map(([h, body]) => (
+          <section key={h} className="grid gap-2 py-7 sm:grid-cols-[220px_1fr] sm:gap-8">
+            <h2 className="text-lg text-leaf-900 dark:text-stone-100">{h}</h2>
+            <p className="text-[15px] leading-relaxed text-stone-600 dark:text-stone-300">{body}</p>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

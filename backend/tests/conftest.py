@@ -15,6 +15,7 @@ os.environ.update({
     "TELEGRAM_BOT_TOKEN": "",
     "DISCORD_WEBHOOK_URL": "",
     "SMTP_HOST": "",
+    "ADMIN_ACCESS_KEY": "test-admin-access-key",
 })
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 

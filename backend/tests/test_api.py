@@ -73,3 +73,33 @@ def test_role_change_and_websocket(client, admin_headers):
         assert ws.receive_json()["type"] == "crawl_status"
         ws.send_text("ping")
         assert ws.receive_json()["type"] == "pong"
+
+
+def test_admin_access_key_login(client):
+    assert client.post("/api/auth/admin-login", json={"access_key": "wrong"}).status_code == 401
+    r = client.post("/api/auth/admin-login", json={"access_key": "test-admin-access-key"})
+    assert r.status_code == 200 and r.json()["user"]["role"] == "admin"
+    h = {"Authorization": f"Bearer {r.json()['access_token']}"}
+    users = client.get("/api/admin/users", headers=h).json()
+    target = next(u for u in users if u["email"] == "user@recipepick.dev")
+    assert client.patch(f"/api/admin/users/{target['id']}", headers=h, json={"daily_kcal": 1800}).status_code == 200
+
+
+def test_test_admin_is_read_only(client):
+    r = client.post("/api/auth/test-admin")
+    assert r.status_code == 200 and r.json()["user"]["role"] == "admin"
+    h = {"Authorization": f"Bearer {r.json()['access_token']}"}
+    assert client.get("/api/admin/overview", headers=h).status_code == 200
+    assert client.get("/api/admin/users", headers=h).status_code == 200
+    users = client.get("/api/admin/users", headers=h).json()
+    target = next(u for u in users if u["email"] == "user@recipepick.dev")
+    for resp in (
+        client.patch(f"/api/admin/users/{target['id']}", headers=h, json={"role": "admin"}),
+        client.post("/api/admin/crawler/run", headers=h),
+        client.patch("/api/admin/crawler", headers=h, json={"enabled": False}),
+        client.post("/api/fridge", headers=h, json={"name": "x", "category": "기타", "quantity": 1, "unit": "개"}),
+        client.patch("/api/auth/me", headers=h, json={"name": "hacked"}),
+    ):
+        assert resp.status_code == 403, resp.text
+        assert "읽기 전용" in resp.json()["detail"]
+    assert client.get("/api/admin/users", headers=h).json()[0]["name"] != "hacked"

@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useRealtime } from "../context/RealtimeContext";
 import { api, CATEGORY_ICONS, timeAgo, won } from "../lib/api";
+import PageHero from "../components/PageHero";
+import { IMG } from "../lib/images";
 
 const MART_COLORS = {
-  이마트: "bg-yellow-400 text-slate-900",
+  이마트: "bg-yellow-400 text-stone-900",
   롯데마트: "bg-red-600 text-white",
   홈플러스: "bg-rose-500 text-white",
 };
@@ -45,23 +47,22 @@ export default function Deals() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl text-leaf-900 dark:text-leaf-100">마트 할인 식재료</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          RPA(Playwright)가 이마트·롯데마트·홈플러스 할인가를 주기적으로 수집합니다.
-          {summary?.last_collected_at && <span className="ml-1 text-leaf-700 dark:text-leaf-300">· {timeAgo(summary.last_collected_at)} 갱신</span>}
-        </p>
-      </div>
+      <PageHero
+        image={IMG.groceryShelf}
+        eyebrow="Today's Rescue Deals"
+        title="마감세일 · 할인 식재료"
+        desc={<>RPA(Playwright)가 이마트·롯데마트·홈플러스 할인가를 주기적으로 수집합니다.{summary?.last_collected_at && <span className="ml-1 font-semibold text-tomato-300">· {timeAgo(summary.last_collected_at)} 갱신</span>}</>}
+      />
 
       {summary && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {summary.marts.map((m) => (
             <button key={m.mart} onClick={() => setFilter((f) => ({ ...f, mart: f.mart === m.mart ? "" : m.mart }))}
               className={`card flex items-center gap-3 p-4 text-left transition hover:-translate-y-0.5 ${filter.mart === m.mart ? "ring-2 ring-leaf-500" : ""}`}>
-              <span className={`grid size-12 shrink-0 place-items-center rounded-xl font-display text-sm ${MART_COLORS[m.mart] || "bg-slate-200"}`}>{m.mart.slice(0, 2)}</span>
+              <span className={`grid size-12 shrink-0 place-items-center rounded-xl font-display text-sm ${MART_COLORS[m.mart] || "bg-stone-200"}`}>{m.mart.slice(0, 2)}</span>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">{m.mart} <span className="text-xs font-normal text-slate-400">{m.count}개</span></p>
-                <p className="text-xs text-slate-500">평균 {m.avg_discount}% 할인 · 총 {won(m.total_saving)} 절약</p>
+                <p className="font-semibold">{m.mart} <span className="text-xs font-normal text-stone-400">{m.count}개</span></p>
+                <p className="text-xs text-stone-500">평균 {m.avg_discount}% 할인 · 총 {won(m.total_saving)} 절약</p>
               </div>
               {filter.mart === m.mart && <i className="fa-solid fa-circle-check text-leaf-600" />}
             </button>
@@ -71,7 +72,7 @@ export default function Deals() {
 
       <div className="card flex flex-col gap-3 p-3 lg:flex-row lg:items-center">
         <div className="relative flex-1">
-          <i className="fa-solid fa-magnifying-glass absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400" />
+          <i className="fa-solid fa-magnifying-glass absolute top-1/2 left-3.5 -translate-y-1/2 text-stone-400" />
           <input className="input pl-10" placeholder="식재료 검색 (예: 두부, 고등어)" value={query} onChange={(e) => setQuery(e.target.value)} />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -95,22 +96,22 @@ export default function Deals() {
           {Array.from({ length: 8 }).map((_, i) => <div key={i} className="skeleton h-56" />)}
         </div>
       ) : deals.length === 0 ? (
-        <div className="card p-12 text-center text-slate-500"><i className="fa-solid fa-store-slash mb-3 block text-4xl text-leaf-300" />조건에 맞는 할인 상품이 없어요.</div>
+        <div className="card p-12 text-center text-stone-500"><i className="fa-solid fa-store-slash mb-3 block text-4xl text-leaf-300" />조건에 맞는 할인 상품이 없어요.</div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {deals.map((d, idx) => (
             <article key={d.id} className="card group flex animate-fade-up flex-col overflow-hidden p-0" style={{ animationDelay: `${Math.min(idx, 12) * 25}ms` }}>
               <div className="relative grid h-28 place-items-center bg-gradient-to-br from-leaf-50 to-leaf-100 dark:from-ink-line dark:to-ink">
                 {d.image_url ? <img src={d.image_url} alt="" className="h-full w-full object-cover" loading="lazy" /> : <i className={`fa-solid ${CATEGORY_ICONS[d.category] || CATEGORY_ICONS.기타} text-4xl text-leaf-500/70 transition group-hover:scale-110`} />}
-                <span className={`absolute top-2 left-2 chip ${MART_COLORS[d.mart] || "bg-slate-600 text-white"}`}>{d.mart}</span>
+                <span className={`absolute top-2 left-2 chip ${MART_COLORS[d.mart] || "bg-stone-600 text-white"}`}>{d.mart}</span>
                 {d.is_closing_sale && <span className="absolute top-2 right-2 chip animate-pulse bg-tomato-500 text-white"><i className="fa-solid fa-clock" />마감</span>}
                 {d.source === "demo" && <span className="absolute bottom-2 right-2 chip bg-black/40 text-[10px] text-white">DEMO</span>}
               </div>
               <div className="flex flex-1 flex-col p-3 sm:p-4">
                 <p className="line-clamp-2 text-sm font-semibold">{d.name}</p>
-                <p className="text-xs text-slate-400">{d.unit} · {d.store}</p>
+                <p className="text-xs text-stone-400">{d.unit} · {d.store}</p>
                 <div className="mt-auto pt-2">
-                  <p className="text-xs text-slate-400"><s>{won(d.original_price)}</s></p>
+                  <p className="text-xs text-stone-400"><s>{won(d.original_price)}</s></p>
                   <p className="flex items-baseline gap-1.5">
                     <span className="font-display text-lg text-tomato-600 dark:text-tomato-400">{Math.round(d.discount_rate)}%</span>
                     <span className="text-base font-bold">{won(d.sale_price)}</span>

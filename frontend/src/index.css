@@ -2,53 +2,73 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * RecipePick 디자인 시스템 — "Rescue Kitchen" 에디토리얼
+ * 웜 페이퍼 배경 + 딥 허브 그린 + 테라코타 포인트, 세리프 헤드라인으로 매거진형 레이아웃.
+ * 토큰 이름(leaf/tomato/cream/ink)은 기존 페이지 호환을 위해 유지하고 값만 교체한다.
+ */
 @theme {
-  --font-display: "Jua", "Pretendard Variable", sans-serif;
+  --font-display: "Noto Serif KR", "Pretendard Variable", serif;
+  --font-serif-en: "Fraunces", "Noto Serif KR", serif;
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 
-  --color-leaf-50: #f0fdf4;
-  --color-leaf-100: #dcfce7;
-  --color-leaf-200: #bbf7d0;
-  --color-leaf-300: #86efac;
-  --color-leaf-400: #4ade80;
-  --color-leaf-500: #22c55e;
-  --color-leaf-600: #16a34a;
-  --color-leaf-700: #15803d;
-  --color-leaf-800: #166534;
-  --color-leaf-900: #14532d;
-  --color-leaf-950: #052e16;
+  --color-leaf-50: #f3f6f1;
+  --color-leaf-100: #e3ebdf;
+  --color-leaf-200: #c6d6bf;
+  --color-leaf-300: #9fba95;
+  --color-leaf-400: #739a68;
+  --color-leaf-500: #527d48;
+  --color-leaf-600: #3d6536;
+  --color-leaf-700: #30502b;
+  --color-leaf-800: #263f23;
+  --color-leaf-900: #1d301b;
+  --color-leaf-950: #0f1b0e;
 
-  --color-tomato-50: #fff7ed;
-  --color-tomato-100: #ffedd5;
-  --color-tomato-400: #fb923c;
-  --color-tomato-500: #f97316;
-  --color-tomato-600: #ea580c;
+  --color-tomato-50: #fdf4ef;
+  --color-tomato-100: #fbe5d9;
+  --color-tomato-200: #f7cdb6;
+  --color-tomato-300: #f2b08f;
+  --color-tomato-400: #ec8a5c;
+  --color-tomato-500: #e0673a;
+  --color-tomato-600: #c4522a;
+  --color-tomato-700: #9e3f1f;
 
-  --color-cream: #f7faf3;
-  --color-ink: #0c1410;
-  --color-ink-soft: #131f18;
-  --color-ink-line: #233229;
+  --color-cream: #faf8f3;
+  --color-paper: #f3efe6;
+  --color-ink: #111412;
+  --color-ink-soft: #191d1a;
+  --color-ink-line: #2a302b;
 
-  --animate-fade-up: fade-up 0.45s ease-out both;
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-float: float 6s ease-in-out infinite;
   --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-ken-burns: ken-burns 18s ease-out both;
 
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes pop {
-    from { opacity: 0; transform: scale(0.9); }
+    from { opacity: 0; transform: scale(0.92); }
     to { opacity: 1; transform: scale(1); }
   }
   @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0); }
-    50% { transform: translateY(-10px) rotate(3deg); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
   @keyframes shimmer {
     from { background-position: -400px 0; }
     to { background-position: 400px 0; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes ken-burns {
+    from { transform: scale(1.08); }
+    to { transform: scale(1); }
   }
 }
 
@@ -58,46 +78,76 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-cream font-sans text-slate-800 antialiased transition-colors duration-300 dark:bg-ink dark:text-slate-200;
+    @apply bg-cream font-sans text-[15px] text-stone-800 antialiased transition-colors duration-300 dark:bg-ink dark:text-stone-200;
     word-break: keep-all;
   }
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  ::selection {
+    @apply bg-tomato-200 text-leaf-950;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-leaf-500;
+    @apply outline-2 outline-offset-2 outline-tomato-500;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
 }
 
+/* 레이아웃 그리드: 모든 페이지가 같은 최대폭·좌우 여백을 사용 */
+@utility container-x {
+  @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+}
+@utility section-y {
+  @apply py-20 sm:py-28;
+}
+@utility eyebrow {
+  @apply text-[11px] font-semibold tracking-[0.22em] text-tomato-600 uppercase dark:text-tomato-400;
+}
+@utility serif-en {
+  font-family: var(--font-serif-en);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
 @utility card {
-  @apply rounded-2xl border border-leaf-100 bg-white/90 shadow-sm backdrop-blur transition-colors dark:border-ink-line dark:bg-ink-soft/90;
+  @apply rounded-2xl border border-stone-200/80 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.04)] transition-colors dark:border-ink-line dark:bg-ink-soft;
 }
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45;
 }
 @utility btn-primary {
-  @apply btn bg-leaf-600 text-white shadow-sm shadow-leaf-600/30 hover:bg-leaf-700;
+  @apply btn bg-leaf-800 text-white hover:bg-leaf-900 dark:bg-leaf-300 dark:text-leaf-950 dark:hover:bg-leaf-200;
 }
 @utility btn-accent {
-  @apply btn bg-tomato-500 text-white shadow-sm shadow-tomato-500/30 hover:bg-tomato-600;
+  @apply btn bg-tomato-500 text-white hover:bg-tomato-600;
 }
 @utility btn-ghost {
-  @apply btn border border-leaf-200 bg-white text-leaf-800 hover:bg-leaf-50 dark:border-ink-line dark:bg-ink-soft dark:text-leaf-200 dark:hover:bg-ink-line;
+  @apply btn border border-stone-300 bg-transparent text-stone-800 hover:border-stone-800 hover:bg-white dark:border-ink-line dark:text-stone-200 dark:hover:border-stone-400 dark:hover:bg-ink-soft;
 }
 @utility input {
-  @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition focus:border-leaf-500 focus:ring-4 focus:ring-leaf-500/15 focus:outline-none dark:border-ink-line dark:bg-ink dark:text-slate-100;
+  @apply w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 transition focus:border-leaf-600 focus:ring-4 focus:ring-leaf-600/10 focus:outline-none dark:border-ink-line dark:bg-ink dark:text-stone-100;
 }
 @utility label {
-  @apply mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400;
+  @apply mb-1.5 block text-xs font-semibold text-stone-600 dark:text-stone-400;
 }
 @utility chip {
   @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
 }
 @utility skeleton {
-  @apply rounded-lg bg-slate-200 dark:bg-ink-line;
-  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  @apply rounded-2xl bg-stone-200/70 dark:bg-ink-line;
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
   background-size: 400px 100%;
   background-repeat: no-repeat;
   animation: var(--animate-shimmer);
+}
+@utility img-zoom {
+  @apply transition-transform duration-700 ease-out group-hover:scale-105;
+}
+@utility link-underline {
+  @apply relative after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full;
 }

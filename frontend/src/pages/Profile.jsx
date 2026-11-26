@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { HEALTH_LABELS } from "../lib/api";
+import PageHero from "../components/PageHero";
+import { IMG } from "../lib/images";
 
 const GUIDES = {
   general: "균형 잡힌 영양소 구성, 가공식품 최소화",
@@ -32,16 +34,19 @@ export default function Profile() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-3xl text-leaf-900 dark:text-leaf-100">건강 프로필</h1>
-        <p className="mt-1 text-sm text-slate-500">AI 레시피 창작 시 프롬프트에 반영되는 개인 건강 정보입니다.</p>
-      </div>
+      <PageHero
+        compact
+        image={IMG.breakfast}
+        eyebrow="Health Profile"
+        title="건강 프로필"
+        desc="AI 레시피 창작 시 프롬프트에 반영되는 개인 건강 정보입니다."
+      />
       <form onSubmit={save} className="card space-y-5 p-6">
         <div className="flex items-center gap-4">
           <span className="grid size-16 place-items-center rounded-2xl bg-leaf-600 font-display text-2xl text-white">{user.name.slice(0, 1)}</span>
           <div>
             <p className="font-semibold">{user.email}</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-stone-500">
               {user.provider === "local" ? "이메일 계정" : `${user.provider} 소셜 계정`} · {user.role === "admin" ? "관리자" : "일반 회원"}
             </p>
           </div>
@@ -55,9 +60,9 @@ export default function Profile() {
           <div className="grid gap-2 sm:grid-cols-2">
             {Object.entries(HEALTH_LABELS).map(([k, h]) => (
               <button type="button" key={k} onClick={() => setForm({ ...form, health_type: k })}
-                className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${form.health_type === k ? "border-leaf-500 bg-leaf-50 ring-2 ring-leaf-500/20 dark:bg-leaf-950/40" : "border-slate-200 hover:border-leaf-300 dark:border-ink-line"}`}>
+                className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${form.health_type === k ? "border-leaf-500 bg-leaf-50 ring-2 ring-leaf-500/20 dark:bg-leaf-950/40" : "border-stone-200 hover:border-leaf-300 dark:border-ink-line"}`}>
                 <span className={`chip mt-0.5 ${h.color}`}><i className={`fa-solid ${h.icon}`} /></span>
-                <span><span className="block text-sm font-semibold">{h.label}</span><span className="text-xs text-slate-500">{GUIDES[k]}</span></span>
+                <span><span className="block text-sm font-semibold">{h.label}</span><span className="text-xs text-stone-500">{GUIDES[k]}</span></span>
               </button>
             ))}
           </div>

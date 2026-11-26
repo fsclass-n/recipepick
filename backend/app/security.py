@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -17,6 +17,8 @@ PASSWORD_RULE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{
 PASSWORD_RULE_MESSAGE = "비밀번호는 영문 대·소문자, 숫자, 특수문자를 모두 포함한 8자 이상이어야 합니다."
 
 bearer = HTTPBearer(auto_error=False)
+SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+READ_ONLY_MESSAGE = "테스트 관리자는 읽기 전용입니다. 데이터 변경은 실제 관리자만 가능합니다."
 
 
 def validate_password(password: str) -> None:
@@ -48,11 +50,14 @@ def decode_token(token: str) -> dict:
     return jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
 
 
-def create_access_token(user: User) -> str:
-    return create_token({"sub": str(user.id), "role": user.role})
+def create_access_token(user: User, read_only: bool = False) -> str:
+    data = {"sub": str(user.id), "role": user.role}
+    if read_only:
+        data["ro"] = True
+    return create_token(data)
 
 
-def user_from_token(token: str, db: Session) -> User | None:
+def _session_from_token(token: str, db: Session) -> tuple[User, dict] | None:
     try:
         payload = decode_token(token)
     except jwt.PyJWTError:
@@ -60,15 +65,26 @@ def user_from_token(token: str, db: Session) -> User | None:
     if payload.get("typ"):
         return None
     user = db.get(User, int(payload.get("sub", 0)))
-    return user if user and user.is_active else None
+    return (user, payload) if user and user.is_active else None
+
+
+def user_from_token(token: str, db: Session) -> User | None:
+    session = _session_from_token(token, db)
+    return session[0] if session else None
 
 
 def get_current_user(
-    creds: HTTPAuthorizationCredentials | None = Depends(bearer), db: Session = Depends(get_db)
+    request: Request,
+    creds: HTTPAuthorizationCredentials | None = Depends(bearer),
+    db: Session = Depends(get_db),
 ) -> User:
-    user = user_from_token(creds.credentials, db) if creds else None
-    if not user:
+    session = _session_from_token(creds.credentials, db) if creds else None
+    if not session:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "인증이 필요합니다.")
+    user, payload = session
+    # 테스트 관리자(읽기 전용 토큰)는 조회만 허용하고 모든 변경 요청을 서버에서 차단
+    if payload.get("ro") and request.method not in SAFE_METHODS:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, READ_ONLY_MESSAGE)
     return user
 
 

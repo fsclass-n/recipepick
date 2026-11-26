@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useRealtime } from "../context/RealtimeContext";
 import { api, CATEGORY_ICONS, won } from "../lib/api";
+import PageHero from "../components/PageHero";
+import { IMG } from "../lib/images";
 
 const CATEGORIES = Object.keys(CATEGORY_ICONS);
 const EMPTY = { name: "", category: "채소", quantity: 1, unit: "개", expires_at: "", is_wishlist: false };
@@ -27,19 +29,19 @@ function ItemCard({ item, onUpdate, onDelete }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{item.name}</p>
-          <p className="text-xs text-slate-500">{item.category}</p>
+          <p className="text-xs text-stone-500">{item.category}</p>
         </div>
       </div>
 
       {!item.is_wishlist && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-1.5">
-          <div className="flex items-center rounded-lg border border-slate-200 dark:border-ink-line">
-            <button onClick={() => onUpdate(item, { quantity: Math.max(0, item.quantity - 1) })} className="px-2 py-1 text-slate-500 hover:text-leaf-700" aria-label="수량 감소"><i className="fa-solid fa-minus text-xs" /></button>
+          <div className="flex items-center rounded-lg border border-stone-200 dark:border-ink-line">
+            <button onClick={() => onUpdate(item, { quantity: Math.max(0, item.quantity - 1) })} className="px-2 py-1 text-stone-500 hover:text-leaf-700" aria-label="수량 감소"><i className="fa-solid fa-minus text-xs" /></button>
             <span className="min-w-10 text-center text-sm font-semibold">{+item.quantity.toFixed(1)}{item.unit}</span>
-            <button onClick={() => onUpdate(item, { quantity: item.quantity + 1 })} className="px-2 py-1 text-slate-500 hover:text-leaf-700" aria-label="수량 증가"><i className="fa-solid fa-plus text-xs" /></button>
+            <button onClick={() => onUpdate(item, { quantity: item.quantity + 1 })} className="px-2 py-1 text-stone-500 hover:text-leaf-700" aria-label="수량 증가"><i className="fa-solid fa-plus text-xs" /></button>
           </div>
           {days !== null && (
-            <span className={`chip whitespace-nowrap ${days <= 1 ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300" : days <= 3 ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" : "bg-slate-100 text-slate-500 dark:bg-ink-line"}`}>
+            <span className={`chip whitespace-nowrap ${days <= 1 ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300" : days <= 3 ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" : "bg-stone-100 text-stone-500 dark:bg-ink-line"}`}>
               {days < 0 ? "기한 지남" : days === 0 ? "오늘까지" : `D-${days}`}
             </span>
           )}
@@ -49,10 +51,10 @@ function ItemCard({ item, onUpdate, onDelete }) {
       {deal ? (
         <a href={deal.url || undefined} target="_blank" rel="noreferrer" className="mt-3 block rounded-xl bg-tomato-50 p-2.5 text-xs dark:bg-tomato-500/10">
           <p className="truncate font-semibold text-tomato-700 dark:text-tomato-400">{deal.mart} · {deal.name}</p>
-          <p className="mt-0.5"><span className="font-bold text-slate-800 dark:text-slate-100">{won(deal.sale_price)}</span> <s className="text-slate-400">{won(deal.original_price)}</s></p>
+          <p className="mt-0.5"><span className="font-bold text-stone-800 dark:text-stone-100">{won(deal.sale_price)}</span> <s className="text-stone-400">{won(deal.original_price)}</s></p>
         </a>
       ) : (
-        <p className="mt-3 rounded-xl bg-slate-50 p-2.5 text-xs text-slate-400 dark:bg-ink/60">현재 매칭된 할인 없음</p>
+        <p className="mt-3 rounded-xl bg-stone-50 p-2.5 text-xs text-stone-400 dark:bg-ink/60">현재 매칭된 할인 없음</p>
       )}
 
       <div className="mt-3 flex gap-1.5 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
@@ -120,16 +122,15 @@ export default function Fridge() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl text-leaf-900 dark:text-leaf-100">냉장고 파먹기</h1>
-          <p className="mt-1 text-sm text-slate-500">할인 중인 재료는 <span className="font-semibold text-tomato-600">주황색 테두리</span>로 자동 하이라이트됩니다.</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowForm((s) => !s)} className="btn-primary"><i className={`fa-solid ${showForm ? "fa-xmark" : "fa-plus"}`} />재료 추가</button>
-          <Link to="/recipe" className="btn-accent"><i className="fa-solid fa-wand-magic-sparkles" /><span className="hidden sm:inline">AI 레시피</span></Link>
-        </div>
-      </div>
+      <PageHero
+        image={IMG.mealPrep}
+        eyebrow="Fridge Rescue"
+        title="냉장고 파먹기"
+        desc={<>유통기한 임박 재료부터 먼저. 할인 중인 재료는 <span className="font-semibold text-tomato-300">주황색 테두리</span>로 자동 하이라이트됩니다.</>}
+      >
+        <button onClick={() => setShowForm((s) => !s)} className="btn bg-white text-leaf-900 hover:bg-cream"><i className={`fa-solid ${showForm ? "fa-xmark" : "fa-plus"}`} />재료 추가</button>
+        <Link to="/recipe" className="btn-accent"><i className="fa-solid fa-wand-magic-sparkles" />AI 레시피</Link>
+      </PageHero>
 
       {showForm && (
         <form onSubmit={add} className="card grid animate-fade-up grid-cols-2 gap-3 p-4 sm:grid-cols-6 sm:items-end">
@@ -164,15 +165,15 @@ export default function Fridge() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="inline-flex rounded-xl bg-white p-1 shadow-sm dark:bg-ink-soft">
           {[["fridge", "fa-snowflake", "냉장고"], ["cart", "fa-cart-shopping", "장바구니"]].map(([k, icon, label]) => (
-            <button key={k} onClick={() => setTab(k)} className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === k ? "bg-leaf-600 text-white shadow" : "text-slate-500 hover:text-leaf-700"}`}>
+            <button key={k} onClick={() => setTab(k)} className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === k ? "bg-leaf-600 text-white shadow" : "text-stone-500 hover:text-leaf-700"}`}>
               <i className={`fa-solid ${icon}`} />{label}
-              <span className={`chip ${tab === k ? "bg-white/20" : "bg-slate-100 dark:bg-ink-line"}`}>{(items || []).filter((i) => (k === "cart") === i.is_wishlist).length}</span>
+              <span className={`chip ${tab === k ? "bg-white/20" : "bg-stone-100 dark:bg-ink-line"}`}>{(items || []).filter((i) => (k === "cart") === i.is_wishlist).length}</span>
             </button>
           ))}
         </div>
         <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
           {["전체", ...CATEGORIES].map((c) => (
-            <button key={c} onClick={() => setCat(c)} className={`chip shrink-0 py-1.5 transition ${cat === c ? "bg-leaf-700 text-white" : "bg-white text-slate-600 hover:bg-leaf-50 dark:bg-ink-soft dark:text-slate-300"}`}>{c}</button>
+            <button key={c} onClick={() => setCat(c)} className={`chip shrink-0 py-1.5 transition ${cat === c ? "bg-leaf-700 text-white" : "bg-white text-stone-600 hover:bg-leaf-50 dark:bg-ink-soft dark:text-stone-300"}`}>{c}</button>
           ))}
         </div>
       </div>
@@ -182,8 +183,8 @@ export default function Fridge() {
           <h2 className="mb-3 text-lg"><i className="fa-solid fa-map-location-dot mr-2 text-sky-500" />장바구니 맵 · 마트별 최저가 동선</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {cartByMart.map(([mart, list]) => (
-              <div key={mart} className={`rounded-xl p-3 ${mart === "할인 없음" ? "bg-slate-50 dark:bg-ink/60" : "bg-sky-50 dark:bg-sky-950/30"}`}>
-                <p className="font-semibold"><i className="fa-solid fa-store mr-1.5 text-sky-500" />{mart} <span className="text-xs text-slate-400">{list.length}개</span></p>
+              <div key={mart} className={`rounded-xl p-3 ${mart === "할인 없음" ? "bg-stone-50 dark:bg-ink/60" : "bg-sky-50 dark:bg-sky-950/30"}`}>
+                <p className="font-semibold"><i className="fa-solid fa-store mr-1.5 text-sky-500" />{mart} <span className="text-xs text-stone-400">{list.length}개</span></p>
                 <ul className="mt-2 space-y-1 text-sm">
                   {list.map((i) => (
                     <li key={i.id} className="flex justify-between gap-2"><span className="truncate">{i.name}</span>{i.matched_deal && <span className="shrink-0 font-semibold">{won(i.matched_deal.sale_price)}</span>}</li>
@@ -205,7 +206,7 @@ export default function Fridge() {
           {Array.from({ length: 10 }).map((_, i) => <div key={i} className="skeleton h-44" />)}
         </div>
       ) : list.length === 0 ? (
-        <div className="card grid place-items-center p-12 text-center text-slate-500">
+        <div className="card grid place-items-center p-12 text-center text-stone-500">
           <i className={`fa-solid ${tab === "cart" ? "fa-cart-shopping" : "fa-snowflake"} mb-3 text-4xl text-leaf-300`} />
           <p>{tab === "cart" ? "장바구니가 비어있어요. 사고 싶은 재료를 담으면 할인 시 알려드려요!" : "냉장고가 비어있어요. 재료를 추가해 보세요."}</p>
         </div>

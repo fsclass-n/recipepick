@@ -16,9 +16,9 @@ export default function Toasts() {
           <i className={`fa-solid ${t.icon || (t.tone === "error" ? "fa-circle-exclamation" : "fa-bell")} mt-0.5 ${t.tone === "error" ? "text-rose-500" : t.tone === "deal" ? "text-tomato-500" : "text-leaf-600"}`} />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold">{t.title}</p>
-            {t.message && <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-300">{t.message}</p>}
+            {t.message && <p className="mt-0.5 text-sm text-stone-600 dark:text-stone-300">{t.message}</p>}
           </div>
-          <button onClick={() => dismissToast(t.id)} className="text-slate-400 hover:text-slate-600" aria-label="닫기"><i className="fa-solid fa-xmark" /></button>
+          <button onClick={() => dismissToast(t.id)} className="text-stone-400 hover:text-stone-600" aria-label="닫기"><i className="fa-solid fa-xmark" /></button>
         </div>
       ))}
     </div>

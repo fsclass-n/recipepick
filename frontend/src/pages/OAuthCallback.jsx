@@ -19,7 +19,7 @@ export default function OAuthCallback() {
   }, [loginWithToken, navigate]);
 
   return (
-    <div className="grid min-h-dvh place-items-center text-leaf-600">
+    <div className="grid min-h-[60vh] place-items-center text-leaf-600">
       <p className="text-center"><i className="fa-solid fa-spinner fa-spin text-3xl" /><br /><span className="mt-3 block text-sm">소셜 로그인 처리 중...</span></p>
     </div>
   );

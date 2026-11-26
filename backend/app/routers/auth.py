@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from ..config import get_settings
 from ..database import get_db
 from ..models import User, utcnow
-from ..schemas import LoginIn, ProfileUpdate, RegisterIn, TokenOut, UserOut
+from ..schemas import AdminKeyIn, LoginIn, ProfileUpdate, RegisterIn, TokenOut, UserOut
 from ..security import (
     create_access_token,
     create_token,
@@ -47,10 +47,17 @@ OAUTH_PROVIDERS = {
 }
 
 
-def _token_response(user: User, db: Session) -> TokenOut:
+def _token_response(user: User, db: Session, read_only: bool = False) -> TokenOut:
     user.last_login_at = utcnow()
     db.commit()
-    return TokenOut(access_token=create_access_token(user), user=UserOut.model_validate(user))
+    return TokenOut(access_token=create_access_token(user, read_only), user=UserOut.model_validate(user))
+
+
+def _first_admin(db: Session) -> User:
+    admin = db.scalar(select(User).where(User.role == "admin", User.is_active.is_(True)).order_by(User.id))
+    if not admin:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "활성화된 관리자 계정이 없습니다.")
+    return admin
 
 
 @router.post("/register", response_model=TokenOut, status_code=201)
@@ -78,6 +85,22 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
     if not user.is_active:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "비활성화된 계정입니다.")
     return _token_response(user, db)
+
+
+@router.post("/admin-login", response_model=TokenOut)
+def admin_login(body: AdminKeyIn, db: Session = Depends(get_db)):
+    """실제 관리자: .env 의 ADMIN_ACCESS_KEY 로 진입해 전체 CRUD 권한 토큰을 발급."""
+    if not settings.admin_access_key:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "서버에 관리자 키(ADMIN_ACCESS_KEY)가 설정되지 않았습니다.")
+    if not secrets.compare_digest(body.access_key.encode(), settings.admin_access_key.encode()):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "관리자 키가 올바르지 않습니다.")
+    return _token_response(_first_admin(db), db)
+
+
+@router.post("/test-admin", response_model=TokenOut)
+def test_admin_login(db: Session = Depends(get_db)):
+    """테스트 관리자: 관리자 화면은 열람하되 모든 변경 요청이 차단되는 읽기 전용 토큰을 발급."""
+    return _token_response(_first_admin(db), db, read_only=True)
 
 
 @router.get("/me", response_model=UserOut)

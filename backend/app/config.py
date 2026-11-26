@@ -44,6 +44,8 @@ class Settings:
         # required(기본): TiDB Cloud 필수 정책과 동일하게 TLS 검증. disabled: RDS 프라이빗 연결 등.
         self.db_ssl_mode = os.getenv("DB_SSL_MODE", "required").strip().lower()
         self.seed_test_accounts = _bool("SEED_TEST_ACCOUNTS", True)
+        # 실제 관리자 진입 키(.env). 비어 있으면 키 로그인 비활성. 테스트 관리자는 읽기 전용 토큰.
+        self.admin_access_key = os.getenv("ADMIN_ACCESS_KEY", "").strip()
 
         self.gemini_api_key = os.getenv("GEMINI_API_KEY", "").strip()
         self.gemini_model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")

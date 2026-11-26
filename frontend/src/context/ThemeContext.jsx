@@ -8,7 +8,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("rp-theme", dark ? "dark" : "light");
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#0c1410" : "#16a34a");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#111412" : "#263f23");
   }, [dark]);
 
   return <ThemeContext.Provider value={{ dark, toggle: () => setDark((d) => !d) }}>{children}</ThemeContext.Provider>;

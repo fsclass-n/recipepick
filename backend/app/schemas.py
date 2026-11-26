@@ -62,6 +62,10 @@ class LoginIn(BaseModel):
     password: str
 
 
+class AdminKeyIn(BaseModel):
+    access_key: str = Field(min_length=1, max_length=256)
+
+
 class ProfileUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
     health_type: HealthType | None = None

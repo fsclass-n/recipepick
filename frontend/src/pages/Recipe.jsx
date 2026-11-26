@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { api, HEALTH_LABELS, timeAgo, won } from "../lib/api";
+import PageHero from "../components/PageHero";
+import { IMG } from "../lib/images";
 
 const LOADING_STEPS = [
   { icon: "fa-snowflake", text: "냉장고 재료를 확인하는 중..." },
@@ -31,9 +33,9 @@ function NutritionBars({ n, health }) {
           <div key={k}>
             <div className="flex justify-between text-xs">
               <span className="font-semibold">{cfg.label}</span>
-              <span className={over ? "font-bold text-rose-600" : "text-slate-500"}>{v.toLocaleString()}{cfg.unit} <span className="text-slate-400">/ 권장 {max.toLocaleString()}</span></span>
+              <span className={over ? "font-bold text-rose-600" : "text-stone-500"}>{v.toLocaleString()}{cfg.unit} <span className="text-stone-400">/ 권장 {max.toLocaleString()}</span></span>
             </div>
-            <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-ink-line">
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-ink-line">
               <div className={`h-full rounded-full transition-all duration-700 ${over ? "bg-rose-500" : cfg.good ? "bg-sky-500" : "bg-leaf-500"}`} style={{ width: `${pct}%` }} />
             </div>
           </div>
@@ -78,9 +80,9 @@ function RecipeCard({ recipe }) {
             <h3 className="mb-2 text-lg">재료</h3>
             <ul className="space-y-1.5">
               {d.ingredients?.map((ing, i) => (
-                <li key={i} className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm ${ing.from_deal ? "bg-tomato-50 dark:bg-tomato-500/10" : "bg-slate-50 dark:bg-ink/60"}`}>
+                <li key={i} className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm ${ing.from_deal ? "bg-tomato-50 dark:bg-tomato-500/10" : "bg-stone-50 dark:bg-ink/60"}`}>
                   <span className="min-w-0 truncate">{ing.from_deal && <i className="fa-solid fa-tag mr-1.5 text-tomato-500" />}{ing.name}</span>
-                  <span className="shrink-0 text-xs text-slate-500">{ing.amount}</span>
+                  <span className="shrink-0 text-xs text-stone-500">{ing.amount}</span>
                 </li>
               ))}
             </ul>
@@ -107,15 +109,15 @@ function RecipeCard({ recipe }) {
           <section>
             <div className="mb-2 flex items-center justify-between">
               <h3 className="text-lg">조리 순서</h3>
-              <span className="text-xs text-slate-400">{done.length}/{d.steps?.length || 0} 완료</span>
+              <span className="text-xs text-stone-400">{done.length}/{d.steps?.length || 0} 완료</span>
             </div>
-            <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-ink-line">
+            <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-stone-100 dark:bg-ink-line">
               <div className="h-full bg-leaf-500 transition-all" style={{ width: `${(done.length / (d.steps?.length || 1)) * 100}%` }} />
             </div>
             <ol className="space-y-2">
               {d.steps?.map((s, i) => (
                 <li key={i}>
-                  <button onClick={() => toggle(i)} className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left text-sm transition ${done.includes(i) ? "border-leaf-200 bg-leaf-50 text-slate-400 line-through dark:border-leaf-900 dark:bg-leaf-950/30" : "border-slate-200 hover:border-leaf-300 dark:border-ink-line"}`}>
+                  <button onClick={() => toggle(i)} className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left text-sm transition ${done.includes(i) ? "border-leaf-200 bg-leaf-50 text-stone-400 line-through dark:border-leaf-900 dark:bg-leaf-950/30" : "border-stone-200 hover:border-leaf-300 dark:border-ink-line"}`}>
                     <span className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold ${done.includes(i) ? "bg-leaf-500 text-white" : "bg-leaf-100 text-leaf-800 dark:bg-leaf-900 dark:text-leaf-200"}`}>
                       {done.includes(i) ? <i className="fa-solid fa-check" /> : i + 1}
                     </span>
@@ -216,10 +218,12 @@ export default function Recipe() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl text-leaf-900 dark:text-leaf-100">AI 맞춤 레시피 창작</h1>
-        <p className="mt-1 text-sm text-slate-500">냉장고 재료 + 마트 할인 식재료 + 내 건강 상태를 조합해 Gemini가 새로운 레시피를 만들어 드려요.</p>
-      </div>
+      <PageHero
+        image={IMG.cooking}
+        eyebrow="AI Meal Curation · Gemini"
+        title="AI 맞춤 레시피 창작"
+        desc="냉장고 재료 + 마트 할인 식재료 + 내 건강 상태를 조합해 Gemini가 새로운 레시피를 만들어 드려요."
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <section className="card space-y-5 p-5 lg:col-span-2">
@@ -228,7 +232,7 @@ export default function Recipe() {
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {Object.entries(HEALTH_LABELS).map(([k, h]) => (
                 <button key={k} onClick={() => setOpts({ ...opts, health_type: k })}
-                  className={`rounded-xl border px-2 py-2.5 text-xs font-semibold transition ${opts.health_type === k ? "border-leaf-500 bg-leaf-50 text-leaf-800 ring-2 ring-leaf-500/20 dark:bg-leaf-950/50 dark:text-leaf-200" : "border-slate-200 text-slate-500 hover:border-leaf-300 dark:border-ink-line"}`}>
+                  className={`rounded-xl border px-2 py-2.5 text-xs font-semibold transition ${opts.health_type === k ? "border-leaf-500 bg-leaf-50 text-leaf-800 ring-2 ring-leaf-500/20 dark:bg-leaf-950/50 dark:text-leaf-200" : "border-stone-200 text-stone-500 hover:border-leaf-300 dark:border-ink-line"}`}>
                   <i className={`fa-solid ${h.icon} mb-1 block text-base`} />{h.label}
                 </button>
               ))}
@@ -237,13 +241,13 @@ export default function Recipe() {
 
           <div>
             <div className="flex items-center justify-between">
-              <label className="label">냉장고 재료 <span className="font-normal text-slate-400">({selFridge?.length || 0}/{fridge.length} 선택)</span></label>
+              <label className="label">냉장고 재료 <span className="font-normal text-stone-400">({selFridge?.length || 0}/{fridge.length} 선택)</span></label>
               <button onClick={() => setSelFridge(selFridge?.length === fridge.length ? [] : fridge.map((i) => i.id))} className="text-xs font-semibold text-leaf-700 dark:text-leaf-300">{selFridge?.length === fridge.length ? "전체 해제" : "전체 선택"}</button>
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {fridge.length === 0 && <p className="text-sm text-slate-400">냉장고가 비어있어요. 할인 재료만으로 만들어 드릴게요.</p>}
+              {fridge.length === 0 && <p className="text-sm text-stone-400">냉장고가 비어있어요. 할인 재료만으로 만들어 드릴게요.</p>}
               {fridge.map((i) => (
-                <button key={i.id} onClick={() => toggle(setSelFridge)(i.id)} className={`chip py-1.5 transition ${selFridge?.includes(i.id) ? "bg-leaf-600 text-white" : "bg-slate-100 text-slate-500 dark:bg-ink-line"}`}>
+                <button key={i.id} onClick={() => toggle(setSelFridge)(i.id)} className={`chip py-1.5 transition ${selFridge?.includes(i.id) ? "bg-leaf-600 text-white" : "bg-stone-100 text-stone-500 dark:bg-ink-line"}`}>
                   {selFridge?.includes(i.id) && <i className="fa-solid fa-check" />}{i.name}
                 </button>
               ))}
@@ -251,7 +255,7 @@ export default function Recipe() {
           </div>
 
           <div>
-            <label className="label">마트 할인 재료 <span className="font-normal text-slate-400">(선택 시 우선 활용)</span></label>
+            <label className="label">마트 할인 재료 <span className="font-normal text-stone-400">(선택 시 우선 활용)</span></label>
             <div className="flex flex-wrap gap-1.5">
               {dealList.map((d) => (
                 <button key={d.id} onClick={() => toggle(setSelDeals)(d.id)} className={`chip py-1.5 transition ${selDeals.includes(d.id) ? "bg-tomato-500 text-white" : "bg-tomato-50 text-tomato-700 dark:bg-tomato-500/10 dark:text-tomato-400"}`}>
@@ -259,7 +263,7 @@ export default function Recipe() {
                 </button>
               ))}
             </div>
-            <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-slate-500">
+            <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-stone-500">
               <input type="checkbox" className="accent-leaf-600" checked={opts.use_top_deals} onChange={(e) => setOpts({ ...opts, use_top_deals: e.target.checked })} />
               장바구니·냉장고 재료와 매칭된 할인 상품 자동 추가
             </label>
@@ -293,16 +297,16 @@ export default function Recipe() {
         <aside className="card p-5">
           <h2 className="mb-3 text-lg"><i className="fa-solid fa-clock-rotate-left mr-2 text-leaf-600" />레시피 기록</h2>
           {history.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-400">아직 기록이 없어요</p>
+            <p className="py-8 text-center text-sm text-stone-400">아직 기록이 없어요</p>
           ) : (
             <ul className="max-h-[32rem] space-y-1.5 overflow-y-auto">
               {history.map((r) => (
-                <li key={r.id} className={`group flex items-center gap-2 rounded-xl px-3 py-2.5 transition ${recipe?.id === r.id ? "bg-leaf-100 dark:bg-leaf-900/40" : "hover:bg-slate-50 dark:hover:bg-ink-line"}`}>
+                <li key={r.id} className={`group flex items-center gap-2 rounded-xl px-3 py-2.5 transition ${recipe?.id === r.id ? "bg-leaf-100 dark:bg-leaf-900/40" : "hover:bg-stone-50 dark:hover:bg-ink-line"}`}>
                   <button onClick={() => { setRecipe(r); setParams({ id: r.id }, { replace: true }); }} className="min-w-0 flex-1 text-left">
                     <p className="truncate text-sm font-semibold">{r.title}</p>
-                    <p className="text-xs text-slate-400">{(HEALTH_LABELS[r.health_type] || HEALTH_LABELS.general).label} · {timeAgo(r.created_at)}</p>
+                    <p className="text-xs text-stone-400">{(HEALTH_LABELS[r.health_type] || HEALTH_LABELS.general).label} · {timeAgo(r.created_at)}</p>
                   </button>
-                  <button onClick={() => removeHistory(r.id)} className="text-slate-300 opacity-0 transition group-hover:opacity-100 hover:text-rose-500" aria-label="삭제"><i className="fa-solid fa-trash text-xs" /></button>
+                  <button onClick={() => removeHistory(r.id)} className="text-stone-300 opacity-0 transition group-hover:opacity-100 hover:text-rose-500" aria-label="삭제"><i className="fa-solid fa-trash text-xs" /></button>
                 </li>
               ))}
             </ul>
@@ -316,7 +320,7 @@ export default function Recipe() {
             <ul className="mx-auto max-w-md space-y-3">
               {LOADING_STEPS.map((s, i) => (
                 <li key={i} className={`flex items-center gap-3 text-sm transition-all duration-500 ${i <= step ? "opacity-100" : "opacity-30"}`}>
-                  <span className={`grid size-9 place-items-center rounded-xl ${i < step ? "bg-leaf-500 text-white" : i === step ? "bg-leaf-100 text-leaf-700 dark:bg-leaf-900 dark:text-leaf-200" : "bg-slate-100 text-slate-400 dark:bg-ink-line"}`}>
+                  <span className={`grid size-9 place-items-center rounded-xl ${i < step ? "bg-leaf-500 text-white" : i === step ? "bg-leaf-100 text-leaf-700 dark:bg-leaf-900 dark:text-leaf-200" : "bg-stone-100 text-stone-400 dark:bg-ink-line"}`}>
                     <i className={`fa-solid ${i < step ? "fa-check" : s.icon} ${i === step ? "fa-beat-fade" : ""}`} />
                   </span>
                   {s.text}

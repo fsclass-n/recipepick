@@ -1,6 +1,6 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router";
-import Footer from "./components/Footer";
+import Footer, { ToTopButton } from "./components/Footer";
 import Header from "./components/Header";
 import Toasts from "./components/Toasts";
 import { useAuth } from "./context/AuthContext";
@@ -33,16 +33,31 @@ function Protected({ admin = false }) {
   return <Outlet />;
 }
 
-function Layout() {
+/** 모든 페이지 공통 레이아웃: 글로벌 헤더 · 푸터 · To-Top 버튼을 고정 배치한다. */
+function SiteLayout() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+      <main className="flex-1">
         <Suspense fallback={<FullSpinner />}>
           <Outlet />
         </Suspense>
       </main>
       <Footer />
+      <ToTopButton />
+    </div>
+  );
+}
+
+/** 회원 전용 화면은 같은 그리드 폭과 상하 여백을 공유한다. */
+function AppContainer() {
+  return (
+    <div className="container-x py-8 sm:py-10">
+      <Outlet />
     </div>
   );
 }
@@ -52,20 +67,22 @@ export default function App() {
     <>
       <Toasts />
       <Routes>
-        <Route index element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/terms" element={<Legal type="terms" />} />
-        <Route path="/privacy" element={<Legal type="privacy" />} />
-        <Route path="/oauth/callback" element={<OAuthCallback />} />
-        <Route element={<Protected />}>
-          <Route element={<Layout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="fridge" element={<Fridge />} />
-            <Route path="deals" element={<Deals />} />
-            <Route path="recipe" element={<Recipe />} />
-            <Route path="profile" element={<Profile />} />
-            <Route element={<Protected admin />}>
-              <Route path="admin" element={<Admin />} />
+        <Route element={<SiteLayout />}>
+          <Route index element={<Landing />} />
+          <Route path="login" element={<Login />} />
+          <Route path="terms" element={<Legal type="terms" />} />
+          <Route path="privacy" element={<Legal type="privacy" />} />
+          <Route path="oauth/callback" element={<OAuthCallback />} />
+          <Route element={<Protected />}>
+            <Route element={<AppContainer />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="fridge" element={<Fridge />} />
+              <Route path="deals" element={<Deals />} />
+              <Route path="recipe" element={<Recipe />} />
+              <Route path="profile" element={<Profile />} />
+              <Route element={<Protected admin />}>
+                <Route path="admin" element={<Admin />} />
+              </Route>
             </Route>
           </Route>
         </Route>

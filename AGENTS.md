@@ -13,8 +13,14 @@
 - RPA standalone: `.venv/Scripts/python.exe -m rpa --mode auto|live|demo [--json]`
 - Run: `cd backend && ../.venv/Scripts/python.exe -m uvicorn app.main:app --port 8000` + `cd frontend && npm run dev`
 
+- UI screenshot check (isolated, never touches prod DB/webhooks): run the backend with `APP_ENV=development SECRET_KEY=<any> DATABASE_URL=sqlite:///<tmp>.db TIDB_HOST= CRAWL_ON_STARTUP=false RPA_MODE=demo TELEGRAM_BOT_TOKEN= DISCORD_WEBHOOK_URL= SMTP_HOST=` (root `.env` is otherwise loaded and is production), frontend with `VITE_API_BASE_URL=http://localhost:<port> npx vite`, then screenshot via `.venv` Playwright (`python -m playwright install chromium` once). Write remote/temp files with LF (`newline="
+"`/bytes) — Windows text mode adds CRLF.
+
 ## Conventions
 - Tailwind v4: custom component classes are defined with `@utility` in `frontend/src/index.css` (not `@layer components`).
+- Design system ("Rescue Kitchen" editorial): tokens keep legacy names (`leaf`=herb green, `tomato`=terracotta, `cream`/`paper`, `ink`); serif headings (`font-display` = Noto Serif KR, `serif-en` = Fraunces italic). Layout utilities: `container-x`, `section-y`, `eyebrow`. Every route renders inside `SiteLayout` (global Header/Footer/ToTop in `App.jsx`); member pages start with `components/PageHero.jsx`.
+- Images: Unsplash IDs live only in `frontend/src/lib/images.js` — verify a new ID returns 200 and check the subject visually before use.
+- Auth roles: real admin = `POST /api/auth/admin-login` with `.env` `ADMIN_ACCESS_KEY` (full CRUD); test admin = `POST /api/auth/test-admin` → JWT with `ro: true`; `get_current_user` rejects every non-GET/HEAD/OPTIONS request for `ro` tokens (403). Password login keeps legacy behavior (tests/video recorder use it).
 - `plotly.js-basic-dist-min` has no histogram trace; aggregate server-side (NumPy) and send bar charts.
 - RPA: respect robots.txt; Emart (Akamai) and Lotte ON (robots Disallow) are `live_enabled = False` → demo data.
 
