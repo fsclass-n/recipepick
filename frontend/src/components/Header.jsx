@@ -137,7 +137,7 @@ function AnnouncementBar() {
         <nav className="hidden shrink-0 items-center gap-5 md:flex">
           <Link to="/#how" className="link-underline hover:text-white">이용 가이드</Link>
           <Link to="/#faq" className="link-underline hover:text-white">자주 묻는 질문</Link>
-          <a href="tel:1588-0000" className="link-underline hover:text-white"><i className="fa-solid fa-phone mr-1 text-[10px]" />고객센터 1588-0000</a>
+          <a href="tel:1577-0000" className="link-underline hover:text-white"><i className="fa-solid fa-phone mr-1 text-[10px]" />고객센터 1577-0000</a>
         </nav>
       </div>
     </div>

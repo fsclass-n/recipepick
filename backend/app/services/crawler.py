@@ -78,6 +78,10 @@ class CrawlerService:
             marts = {d.mart for d in raw}
             if marts:
                 db.execute(delete(Deal).where(Deal.mart.in_(marts)))
+            # 수집 대상에서 빠진 마트(예: 오이마켓 → 오아시스마켓 교체)의 이전 할인 정보 정리
+            from rpa.marts import CRAWLERS
+
+            db.execute(delete(Deal).where(Deal.mart.not_in([c.label for c in CRAWLERS])))
             # 외부 핫링크 이미지를 S3로 미러링 (S3_BUCKET 미설정/실패 시 원본 유지)
             mirrored = {u: mirror_image_to_s3(u) for u in {d.image_url for d in raw if d.image_url}}
             new_deals = [

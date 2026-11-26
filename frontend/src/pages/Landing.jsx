@@ -36,7 +36,7 @@ const MARTS = [
   { name: "홈플러스", badge: "실시간 수집", live: true, note: "공개 검색 페이지 기준 자동 수집" },
   { name: "이마트", badge: "데모 데이터", note: "공식 제휴·API 연동 준비 중" },
   { name: "롯데마트", badge: "데모 데이터", note: "공식 제휴·API 연동 준비 중" },
-  { name: "오이마켓", badge: "데모 데이터", note: "사이트 점검 중 · 복구 시 자동 수집 전환" },
+  { name: "오아시스마켓", badge: "실시간 수집", live: true, note: "공개 검색 페이지 기준 자동 수집" },
 ];
 
 const FAQ = [
@@ -360,8 +360,8 @@ function FaqSection() {
     <section id="faq" className="section-y scroll-mt-24 bg-paper/60 dark:bg-ink-soft/40">
       <div className="container-x grid gap-12 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <SectionHead eyebrow="FAQ" title="자주 묻는 질문" desc="더 궁금한 점은 고객센터(1588-0000)로 문의해 주세요." />
-          <a href="tel:1588-0000" className="btn-ghost mt-6"><i className="fa-solid fa-phone" />고객센터 1588-0000</a>
+          <SectionHead eyebrow="FAQ" title="자주 묻는 질문" desc="더 궁금한 점은 고객센터(1577-0000)로 문의해 주세요." />
+          <a href="tel:1577-0000" className="btn-ghost mt-6"><i className="fa-solid fa-phone" />고객센터 1577-0000</a>
         </div>
         <div className="divide-y divide-stone-200 border-y border-stone-200 lg:col-span-8 dark:divide-ink-line dark:border-ink-line">
           {FAQ.map((f, i) => (

@@ -47,7 +47,7 @@ export default function Deals() {
         image={IMG.groceryShelf}
         eyebrow="Today's Rescue Deals"
         title="마감세일 · 할인 식재료"
-        desc={<>RPA(Playwright)가 이마트·롯데마트·홈플러스·오이마켓 할인가를 주기적으로 수집합니다.{summary?.last_collected_at && <span className="ml-1 font-semibold text-tomato-300">· {timeAgo(summary.last_collected_at)} 갱신</span>}</>}
+        desc={<>RPA(Playwright)가 이마트·롯데마트·홈플러스·오아시스마켓 할인가를 주기적으로 수집합니다.{summary?.last_collected_at && <span className="ml-1 font-semibold text-tomato-300">· {timeAgo(summary.last_collected_at)} 갱신</span>}</>}
       />
 
       {summary && (
@@ -97,15 +97,24 @@ export default function Deals() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {deals.map((d, idx) => (
             <article key={d.id} className="card group flex animate-fade-up flex-col overflow-hidden p-0" style={{ animationDelay: `${Math.min(idx, 12) * 25}ms` }}>
-              <div className="relative grid h-28 place-items-center bg-gradient-to-br from-leaf-50 to-leaf-100 dark:from-ink-line dark:to-ink">
-                {d.image_url ? <img src={d.image_url} alt="" className="h-full w-full object-cover" loading="lazy" /> : <i className={`fa-solid ${CATEGORY_ICONS[d.category] || CATEGORY_ICONS.기타} text-4xl text-leaf-500/70 transition group-hover:scale-110`} />}
+              {/* 4:3 고정 + overflow-hidden: 세로로 긴 상품 사진이 아래 상품 정보를 덮지 않도록 영역 안에서 잘라낸다 */}
+              <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-white dark:bg-ink">
+                {d.image_url ? (
+                  <img src={d.image_url} alt={d.name} loading="lazy"
+                    className={`absolute inset-0 size-full transition duration-500 group-hover:scale-105 ${d.source === "demo" ? "object-cover" : "object-contain p-3"}`} />
+                ) : (
+                  <div className="grid size-full place-items-center bg-gradient-to-br from-leaf-50 to-paper dark:from-ink-line dark:to-ink">
+                    <i className={`fa-solid ${CATEGORY_ICONS[d.category] || CATEGORY_ICONS.기타} text-4xl text-leaf-500/70 transition group-hover:scale-110`} />
+                  </div>
+                )}
                 <span className={`absolute top-2 left-2 chip ${MARTS[d.mart]?.chip || "bg-stone-600 text-white"}`}>{d.mart}</span>
                 {d.is_closing_sale && <span className="absolute top-2 right-2 chip animate-pulse bg-tomato-500 text-white"><i className="fa-solid fa-clock" />마감</span>}
                 {d.source === "demo" && <span className="absolute bottom-2 right-2 chip bg-black/40 text-[10px] text-white">DEMO</span>}
               </div>
               <div className="flex flex-1 flex-col p-3 sm:p-4">
-                <p className="line-clamp-2 text-sm font-semibold">{d.name}</p>
-                <p className="text-xs text-stone-400">{d.unit} · {d.store}</p>
+                <p className="text-[11px] text-stone-400">{d.category}</p>
+                <p className="line-clamp-2 min-h-[2.5em] text-sm leading-snug font-semibold" title={d.name}>{d.name}</p>
+                <p className="mt-0.5 truncate text-xs text-stone-400">{[d.unit, d.store].filter(Boolean).join(" · ")}</p>
                 <div className="mt-auto pt-2">
                   <p className="text-xs text-stone-400"><s>{won(d.original_price)}</s></p>
                   <p className="flex items-baseline gap-1.5">

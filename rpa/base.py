@@ -27,7 +27,8 @@ CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
 
 NON_FOOD_RE = re.compile(
     r"찜기|냄비|프라이팬|용기|보관함|밀폐|트레이|커터|슬라이서|조리기|에어프라이어|전자레인지|그릇|접시|도마|"
-    r"수세미|세제|장난감|사료|간식\s*펫|강아지|고양이|화분|씨앗|모종|비료|스티커|키링|인형"
+    r"수세미|세제|장난감|사료|간식\s*펫|강아지|고양이|화분|씨앗|모종|비료|스티커|키링|인형|"
+    r"칫솔|치약|염색|샴푸|린스|컨디셔너|바디워시|로션|티슈|휴지|세탁|섬유유연제|밴드|마스크|기저귀|생리대|면도"
 )
 
 PRICE_RE = re.compile(r"(\d{1,3}(?:,\d{3})+|\d+)\s*원?")
@@ -107,6 +108,7 @@ class BaseMartCrawler:
     live_enabled: bool = True
     disabled_reason: str = ""
     crawl_delay: float = 2.0
+    max_per_keyword: int | None = None  # 검색 결과가 많은 마트는 키워드당 할인율 상위 N건만 사용
     user_agent: str = "Mozilla/5.0 (compatible; RecipePickBot/1.0; +https://github.com/fsclass-n/recipepick)"
     closing_keywords: tuple[str, ...] = ("마감", "타임", "오늘만", "반짝")
     _robots: dict[str, RobotFileParser] = {}
@@ -194,6 +196,8 @@ class BaseMartCrawler:
                     time.sleep(self.crawl_delay)
                 html = self.fetch_html(page, url, timeout_ms)
                 found = self.parse(html, page.url)
+                if self.max_per_keyword:
+                    found = sorted(found, key=lambda d: -d.discount_rate)[: self.max_per_keyword]
                 log(f"[{self.label}] '{keywords[i]}' → 할인 상품 {len(found)}건")
                 results.extend(found)
         finally:

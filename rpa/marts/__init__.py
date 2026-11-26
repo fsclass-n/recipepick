@@ -1,8 +1,8 @@
 from .emart import EmartCrawler
 from .homeplus import HomeplusCrawler
 from .lottemart import LotteMartCrawler
-from .oimarket import OimarketCrawler
+from .oasis import OasisCrawler
 
-CRAWLERS = [EmartCrawler(), LotteMartCrawler(), HomeplusCrawler(), OimarketCrawler()]
+CRAWLERS = [EmartCrawler(), LotteMartCrawler(), HomeplusCrawler(), OasisCrawler()]
 
-__all__ = ["CRAWLERS", "EmartCrawler", "LotteMartCrawler", "HomeplusCrawler", "OimarketCrawler"]
+__all__ = ["CRAWLERS", "EmartCrawler", "LotteMartCrawler", "HomeplusCrawler", "OasisCrawler"]

@@ -2,4 +2,4 @@
 emart-symbol.svg      Wikimedia Commons "Emart Logo.svg" (Public domain) — 워드마크에서 'e' 심볼만 남김
 lottemart-symbol.svg  Wikimedia Commons "Lotte Mart (2023).svg" (Public domain) — 원형 엠블럼만 남김
 homeplus-symbol.svg   Wikimedia Commons "홈플러스 로고.jpg"(CC BY-SA 4.0, 홈플러스 기업)의 심볼을 벡터로 재작성
-오이마켓              공식 로고를 확보하지 못해(사이트 도메인 조회 불가) 아이콘 배지로 대체
+oasis-symbol.png      오아시스마켓 공식 웹 아이콘(oasis.co.kr apple-touch-icon)

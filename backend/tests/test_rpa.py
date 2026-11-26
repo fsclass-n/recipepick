@@ -36,7 +36,7 @@ def test_helpers():
 def test_demo_mode_all_marts():
     result = run_all(mode="demo", log=lambda m: None)
     assert set(result["sources"].values()) == {"demo"}
-    assert set(result["sources"]) == {"이마트", "롯데마트", "홈플러스", "오이마켓"} and result["deals"]
+    assert set(result["sources"]) == {"이마트", "롯데마트", "홈플러스", "오아시스마켓"} and result["deals"]
 
 
 def test_demo_catalog_images_exist():
@@ -51,3 +51,12 @@ def test_demo_catalog_images_exist():
         assert (public / DEMO_IMAGES[name].lstrip("/")).is_file(), name
     deals = run_all(mode="demo", log=lambda m: None)["deals"]
     assert all(d.image_url.startswith("/demo/") for d in deals)
+
+
+def test_non_food_filtered():
+    from rpa.base import NON_FOOD_RE
+
+    for name in ("LG 페리오 키즈 칫솔 1입", "흑모비책 한방크림 염색약", "LG 엘라스틴 컨디셔너 1100ML", "잘풀리는집 미용티슈 200매", "simplus 혼합형 밴드"):
+        assert NON_FOOD_RE.search(name), name
+    for name in ("국산콩 쌈두부 100g", "노르웨이 고등어 2손", "유기농 양배추즙", "닭가슴살 소시지"):
+        assert not NON_FOOD_RE.search(name), name

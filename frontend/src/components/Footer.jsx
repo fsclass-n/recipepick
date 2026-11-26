@@ -35,7 +35,7 @@ const COLUMNS = [
 const SOCIAL = [
   ["fa-brands fa-github", "https://github.com/fsclass-n/recipepick", "GitHub"],
   ["fa-solid fa-book-open", "https://fsclass-n.github.io/recipepick/", "프로젝트 안내"],
-  ["fa-solid fa-phone", "tel:1588-0000", "고객센터 1588-0000"],
+  ["fa-solid fa-phone", "tel:1577-0000", "고객센터 1577-0000"],
 ];
 
 function FooterLink({ to, href, label, strong }) {
@@ -95,7 +95,7 @@ export default function Footer() {
           </div>
           <div className="lg:col-span-3">
             <p className="eyebrow !text-stone-400">고객센터</p>
-            <a href="tel:1588-0000" className="mt-4 block font-display text-3xl tracking-tight text-leaf-900 hover:text-tomato-600 dark:text-stone-100">1588-0000</a>
+            <a href="tel:1577-0000" className="mt-4 block font-display text-3xl tracking-tight text-leaf-900 hover:text-tomato-600 dark:text-stone-100">1577-0000</a>
             <p className="mt-2 text-[13px] leading-relaxed text-stone-500 dark:text-stone-400">평일 09:00 – 18:00 (점심 12:00 – 13:00)<br />주말 · 공휴일 휴무</p>
             <a href="https://github.com/fsclass-n/recipepick/issues" target="_blank" rel="noreferrer" className="btn-ghost mt-4 py-2 text-xs">
               <i className="fa-brands fa-github" />이슈 남기기
@@ -109,7 +109,7 @@ export default function Footer() {
               <b className="font-semibold text-stone-700 dark:text-stone-200">RecipePick</b>
               <span className="mx-2 text-stone-300">|</span>대표 홍기흥
               <span className="mx-2 text-stone-300">|</span>개인정보 보호책임자 홍기흥
-              <span className="mx-2 text-stone-300">|</span>고객센터 1588-0000
+              <span className="mx-2 text-stone-300">|</span>고객센터 1577-0000
             </p>
             <p>할인 정보는 각 마트 공개 페이지 기준이며 실제 매장 가격과 다를 수 있습니다. DEMO 표시 상품은 시뮬레이션 데이터입니다.</p>
             <p>AI 레시피와 영양 정보는 일반적인 식단 참고용이며 의학적 진단·처방을 대체하지 않습니다.</p>
