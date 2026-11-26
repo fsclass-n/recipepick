@@ -312,7 +312,7 @@ function DealsSection({ stats, startTo }) {
         <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {MARTS.map((m) => (
             <div key={m.name} className="flex items-center gap-4 rounded-2xl border border-stone-200 p-4 dark:border-ink-line">
-              <MartLogo mart={m.name} className="h-12 w-24" />
+              <MartLogo mart={m.name} />
               <div>
                 <p className="font-semibold">
                   {m.name}

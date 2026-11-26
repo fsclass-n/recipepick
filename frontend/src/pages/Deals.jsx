@@ -55,7 +55,7 @@ export default function Deals() {
           {summary.marts.map((m) => (
             <button key={m.mart} onClick={() => setFilter((f) => ({ ...f, mart: f.mart === m.mart ? "" : m.mart }))}
               className={`card flex items-center gap-3 p-4 text-left transition hover:-translate-y-0.5 ${filter.mart === m.mart ? "ring-2 ring-leaf-500" : ""}`}>
-              <MartLogo mart={m.mart} className="h-12 w-24" />
+              <MartLogo mart={m.mart} />
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">{m.mart} <span className="text-xs font-normal text-stone-400">{m.count}개</span></p>
                 <p className="text-xs text-stone-500">평균 {m.avg_discount}% 할인 · 총 {won(m.total_saving)} 절약</p>
