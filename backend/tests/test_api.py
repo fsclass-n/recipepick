@@ -7,6 +7,12 @@ def test_health(client):
     assert r.json()["status"] == "ok"
 
 
+def test_head_requests_get_200(client):
+    """UptimeRobot 무료 모니터는 HEAD 요청을 보낸다 — HEAD가 405가 되면 안 된다."""
+    assert client.head("/api/health").status_code == 200
+    assert client.head("/").status_code == 200
+
+
 def test_register_password_rule(client):
     weak = client.post("/api/auth/register", json={"email": "a@b.com", "password": "password1", "name": "A"})
     assert weak.status_code == 422

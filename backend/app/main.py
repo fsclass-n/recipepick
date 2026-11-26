@@ -2,7 +2,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select, update
 
@@ -48,6 +48,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def head_as_get(request: Request, call_next):
+    """UptimeRobot 등 HEAD 헬스체크 지원: FastAPI는 GET 라우트에 HEAD를 자동 제공하지 않아
+    HEAD 요청이 405가 되므로, GET처럼 처리해 200을 돌려준다."""
+    if request.method == "HEAD":
+        request.scope["method"] = "GET"
+    return await call_next(request)
+
 
 for r in (auth, fridge, deals, recipes, notifications, admin, ws):
     app.include_router(r.router)
